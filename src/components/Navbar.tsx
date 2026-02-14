@@ -5,12 +5,12 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 const navLinks = [
-  { name: "Product", href: "#" },
-  { name: "Solutions", href: "#" },
-  { name: "Programs", href: "#" },
-  { name: "Resources", href: "#" },
+  { name: "Projects", href: "#" },
+  { name: "About us", href: "#" },
+  { name: "Features", href: "#" },
   { name: "Pricing", href: "#" },
-  { name: "Contact", href: "#" },
+  { name: "Testimonials", href: "#" },
+  // { name: "Contact", href: "#" },
 ];
 
 // Animated NavLink with curly wave-in effect
@@ -118,7 +118,7 @@ export default function Navbar() {
           textDecoration: "none",
         }}
       >
-        VIZCOM
+        NeuronUI
       </Link>
 
       {/* Center Links */}
@@ -136,7 +136,7 @@ export default function Navbar() {
 
       {/* Right Actions */}
       <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-        <Link
+        {/* <Link
           href="#"
           style={{
             color: "#fff",
@@ -146,7 +146,7 @@ export default function Navbar() {
           }}
         >
           Login
-        </Link>
+        </Link> */}
         <Link
           href="#"
           style={{
@@ -166,7 +166,7 @@ export default function Navbar() {
             (e.currentTarget.style.backgroundColor = "#1145A0")
           }
         >
-          Try it out
+          Book a Demo
         </Link>
       </div>
     </nav>
