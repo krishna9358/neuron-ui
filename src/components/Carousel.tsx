@@ -1,59 +1,72 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 
 const images = [
   {
     src: "/frames-01/ezgif-frame-001.jpg",
     alt: "Design 1",
-    label: "Make this design real",
   },
   {
     src: "/images/carousel-2.png",
     alt: "Design 2",
-    label: "Make this concept real",
   },
   {
     src: "/images/carousel-3.png",
     alt: "Design 3",
-    label: "Make this project real",
   },
-  
 ];
 
-const CARD_WIDTH = 340;
-const CARD_GAP = 120;
-
-const positionConfigs = {
-  left: {
-    x: -(CARD_WIDTH + CARD_GAP) * 1,
-    scale: 0.82,
-    rotate: -5,
-    zIndex: 5,
-    opacity: 0.85,
-  },
-  center: {
-    x: 0,
-    scale: 1,
-    rotate: 0,
-    zIndex: 15,
-    opacity: 1,
-  },
-  right: {
-    x: (CARD_WIDTH + CARD_GAP) * 1,
-    scale: 0.82,
-    rotate: 5,
-    zIndex: 5,
-    opacity: 0.85,
-  },
-};
+function getCarouselConfig(windowWidth: number) {
+  if (windowWidth < 480) {
+    return { cardWidth: 200, cardGap: 30, showSide: false };
+  } else if (windowWidth < 768) {
+    return { cardWidth: 260, cardGap: 50, showSide: true };
+  } else {
+    return { cardWidth: 340, cardGap: 120, showSide: true };
+  }
+}
 
 export default function Carousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [windowWidth, setWindowWidth] = useState(1024);
+
+  useEffect(() => {
+    const update = () => setWindowWidth(window.innerWidth);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  const { cardWidth, cardGap, showSide } = getCarouselConfig(windowWidth);
+
+  const positionConfigs = {
+    left: {
+      x: -(cardWidth + cardGap) * 1,
+      scale: 0.82,
+      rotate: -5,
+      zIndex: 5,
+      opacity: showSide ? 0.85 : 0,
+    },
+    center: {
+      x: 0,
+      scale: 1,
+      rotate: 0,
+      zIndex: 15,
+      opacity: 1,
+    },
+    right: {
+      x: (cardWidth + cardGap) * 1,
+      scale: 0.82,
+      rotate: 5,
+      zIndex: 5,
+      opacity: showSide ? 0.85 : 0,
+    },
+  };
 
   const nextSlide = () => setCurrentIndex((p) => (p + 1) % images.length);
   const prevSlide = () =>
@@ -85,10 +98,10 @@ export default function Carousel() {
         aria-label="Previous"
         style={{
           position: "absolute",
-          left: "20px",
+          left: windowWidth < 480 ? "4px" : "20px",
           zIndex: 60,
-          width: "40px",
-          height: "40px",
+          width: windowWidth < 480 ? "32px" : "40px",
+          height: windowWidth < 480 ? "32px" : "40px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -108,10 +121,10 @@ export default function Carousel() {
         aria-label="Next"
         style={{
           position: "absolute",
-          right: "20px",
+          right: windowWidth < 480 ? "4px" : "20px",
           zIndex: 60,
-          width: "40px",
-          height: "40px",
+          width: windowWidth < 480 ? "32px" : "40px",
+          height: windowWidth < 480 ? "32px" : "40px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -131,6 +144,7 @@ export default function Carousel() {
         if (position === "hidden") return null;
 
         const config = positionConfigs[position];
+        const isCenter = position === "center";
         const isHovered = hoveredIndex === i;
 
         // Float params per position for organic bobbing
@@ -154,7 +168,11 @@ export default function Carousel() {
             style={{
               position: "absolute",
               zIndex: isHovered ? 40 : config.zIndex,
-              cursor: "pointer",
+              cursor: isCenter ? "default" : "pointer",
+            }}
+            onClick={() => {
+              // Click side cards to select them
+              if (!isCenter) setCurrentIndex(i);
             }}
             onMouseEnter={() => setHoveredIndex(i)}
             onMouseLeave={() => setHoveredIndex(null)}
@@ -174,7 +192,7 @@ export default function Carousel() {
               <div
                 style={{
                   position: "relative",
-                  width: `${CARD_WIDTH}px`,
+                  width: `${cardWidth}px`,
                   aspectRatio: "16 / 10",
                 }}
               >
@@ -189,7 +207,11 @@ export default function Carousel() {
                     boxShadow: isHovered
                       ? "0 20px 60px rgba(0,0,0,0.3)"
                       : "0 10px 40px rgba(0,0,0,0.15)",
-                    filter: isHovered ? "grayscale(0%)" : "grayscale(100%)",
+                    filter: isCenter
+                      ? "grayscale(0%)"
+                      : isHovered
+                        ? "grayscale(30%)"
+                        : "grayscale(100%)",
                     transition: "filter 0.4s ease, box-shadow 0.3s ease",
                   }}
                 >
@@ -200,116 +222,57 @@ export default function Carousel() {
                     style={{ objectFit: "cover" }}
                     sizes="340px"
                   />
-                </div>
 
-                {/* Orange selection box on hover */}
-                <AnimatePresence>
-                  {isHovered && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
+                  {/* Subtle glow ring on hover for side cards */}
+                  {isHovered && !isCenter && (
+                    <div
                       style={{
                         position: "absolute",
-                        top: "-8px",
-                        left: "-8px",
-                        right: "-8px",
-                        bottom: "-8px",
-                        border: "2px solid #e8622c",
+                        inset: 0,
+                        border: "2px solid rgba(255,255,255,0.3)",
+                        borderRadius: "12px",
                         pointerEvents: "none",
-                        zIndex: 20,
                       }}
-                    >
-                      {[
-                        { top: -5, left: -5 },
-                        { top: -5, right: -5 },
-                        { bottom: -5, left: -5 },
-                        { bottom: -5, right: -5 },
-                        { top: -5, left: "50%", transform: "translateX(-50%)" },
-                        {
-                          bottom: -5,
-                          left: "50%",
-                          transform: "translateX(-50%)",
-                        },
-                        { top: "50%", left: -5, transform: "translateY(-50%)" },
-                        {
-                          top: "50%",
-                          right: -5,
-                          transform: "translateY(-50%)",
-                        },
-                      ].map((pos, idx) => (
-                        <div
-                          key={idx}
-                          style={
-                            {
-                              position: "absolute",
-                              width: "8px",
-                              height: "8px",
-                              backgroundColor: "#fff",
-                              border: "2px solid #e8622c",
-                              ...pos,
-                            } as React.CSSProperties
-                          }
-                        />
-                      ))}
-                    </motion.div>
+                    />
                   )}
-                </AnimatePresence>
-
-                {/* Floating CTA tooltip on hover */}
-                <AnimatePresence>
-                  {isHovered && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 8 }}
-                      transition={{ duration: 0.2 }}
-                      style={{
-                        position: "absolute",
-                        bottom: "-8px",
-                        right: "16px",
-                        transform: "translateY(100%)",
-                        zIndex: 50,
-                      }}
-                    >
-                      <div
-                        style={{
-                          backgroundColor: "#2a2a2e",
-                          color: "#fff",
-                          padding: "10px 16px",
-                          borderRadius: "14px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                          boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        <span style={{ fontSize: "13px", fontWeight: 500 }}>
-                          {img.label}
-                        </span>
-                        <div
-                          style={{
-                            backgroundColor: "#1145A0",
-                            padding: "5px",
-                            borderRadius: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <ArrowRight size={13} color="#fff" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                </div>
               </div>
             </motion.div>
           </motion.div>
         );
       })}
+
+      {/* Dot indicators */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "-28px",
+          display: "flex",
+          gap: "8px",
+          zIndex: 60,
+        }}
+      >
+        {images.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentIndex(i)}
+            aria-label={`Go to slide ${i + 1}`}
+            style={{
+              width: i === currentIndex ? "24px" : "8px",
+              height: "8px",
+              borderRadius: "4px",
+              border: "none",
+              backgroundColor:
+                i === currentIndex
+                  ? "rgba(0,0,0,0.6)"
+                  : "rgba(0,0,0,0.15)",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              padding: 0,
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }

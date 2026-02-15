@@ -3,6 +3,18 @@
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import ProjectCard, { type ProjectData } from "./ProjectCard";
 
+// Hook: window width for responsive layout
+function useWindowWidth() {
+  const [w, setW] = useState(1024);
+  useEffect(() => {
+    const u = () => setW(window.innerWidth);
+    u();
+    window.addEventListener("resize", u);
+    return () => window.removeEventListener("resize", u);
+  }, []);
+  return w;
+}
+
 const projects: ProjectData[] = [
   {
     title: "Modevelle",
@@ -70,6 +82,14 @@ const cardGradients = [
   "linear-gradient(160deg, rgba(46,26,10,0.75) 0%, rgba(64,40,16,0.7) 40%, rgba(96,64,24,0.65) 100%)",
 ];
 
+// ── Per-card background images (blurred behind gradient) ──
+const cardBackgroundImages = [
+  "/images/carousel-1.png",
+  "/images/carousel-2.png",
+  "/images/carousel-3.png",
+  "/images/carousel-1.png",
+];
+
 const ScrollStackSection: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -77,6 +97,13 @@ const ScrollStackSection: React.FC = () => {
   const progressNumberRef = useRef<HTMLSpanElement>(null);
   const rafId = useRef(0);
   const lastProgress = useRef(-1);
+  const windowWidth = useWindowWidth();
+  const isMobile = windowWidth > 0 && windowWidth < 768;
+
+  const CARD_MARGIN_RESPONSIVE = isMobile ? 8 : CARD_MARGIN;
+  const PROGRESS_SIZE_R = isMobile ? 90 : PROGRESS_SIZE;
+  const PROGRESS_RADIUS_R = isMobile ? 36 : PROGRESS_RADIUS;
+  const PROGRESS_CIRCUMFERENCE_R = 2 * Math.PI * PROGRESS_RADIUS_R;
 
   // Track active card for content fade animation
   const [activeCard, setActiveCard] = useState(0);
@@ -135,7 +162,7 @@ const ScrollStackSection: React.FC = () => {
       const numSpan = progressNumberRef.current;
       if (circle) {
         const fillFraction = (activeIdx + 1) / TOTAL_CARDS;
-        const offset = PROGRESS_CIRCUMFERENCE * (1 - fillFraction);
+        const offset = PROGRESS_CIRCUMFERENCE_R * (1 - fillFraction);
         circle.style.strokeDashoffset = String(offset);
       }
       if (numSpan) {
@@ -233,18 +260,18 @@ const ScrollStackSection: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            top: "32px",
-            left: "36px",
+            top: isMobile ? "16px" : "32px",
+            left: isMobile ? "16px" : "36px",
             zIndex: 100,
-            width: `${PROGRESS_SIZE}px`,
-            height: `${PROGRESS_SIZE}px`,
+            width: `${PROGRESS_SIZE_R}px`,
+            height: `${PROGRESS_SIZE_R}px`,
             pointerEvents: "none",
           }}
         >
           <svg
-            width={PROGRESS_SIZE}
-            height={PROGRESS_SIZE}
-            viewBox={`0 0 ${PROGRESS_SIZE} ${PROGRESS_SIZE}`}
+            width={PROGRESS_SIZE_R}
+            height={PROGRESS_SIZE_R}
+            viewBox={`0 0 ${PROGRESS_SIZE_R} ${PROGRESS_SIZE_R}`}
             style={{
               position: "absolute",
               top: 0,
@@ -254,9 +281,9 @@ const ScrollStackSection: React.FC = () => {
           >
             {/* Background circle */}
             <circle
-              cx={PROGRESS_SIZE / 2}
-              cy={PROGRESS_SIZE / 2}
-              r={PROGRESS_RADIUS}
+              cx={PROGRESS_SIZE_R / 2}
+              cy={PROGRESS_SIZE_R / 2}
+              r={PROGRESS_RADIUS_R}
               fill="none"
               stroke="rgba(255,255,255,0.08)"
               strokeWidth="1.5"
@@ -264,15 +291,15 @@ const ScrollStackSection: React.FC = () => {
             {/* Progress arc */}
             <circle
               ref={progressCircleRef}
-              cx={PROGRESS_SIZE / 2}
-              cy={PROGRESS_SIZE / 2}
-              r={PROGRESS_RADIUS}
+              cx={PROGRESS_SIZE_R / 2}
+              cy={PROGRESS_SIZE_R / 2}
+              r={PROGRESS_RADIUS_R}
               fill="none"
               stroke="rgba(255,255,255,0.5)"
               strokeWidth="1.5"
               strokeLinecap="round"
-              strokeDasharray={PROGRESS_CIRCUMFERENCE}
-              strokeDashoffset={PROGRESS_CIRCUMFERENCE}
+              strokeDasharray={PROGRESS_CIRCUMFERENCE_R}
+              strokeDashoffset={PROGRESS_CIRCUMFERENCE_R}
               style={{ transition: "stroke-dashoffset 0.6s ease" }}
             />
           </svg>
@@ -296,6 +323,7 @@ const ScrollStackSection: React.FC = () => {
                 fontWeight: 500,
                 textTransform: "uppercase",
                 lineHeight: 1,
+                display: isMobile ? "none" : "block",
               }}
             >
               PROJECT
@@ -310,7 +338,7 @@ const ScrollStackSection: React.FC = () => {
               <span
                 ref={progressNumberRef}
                 style={{
-                  fontSize: "28px",
+                  fontSize: isMobile ? "20px" : "28px",
                   fontWeight: 600,
                   color: "#fff",
                   lineHeight: 1,
@@ -321,7 +349,7 @@ const ScrollStackSection: React.FC = () => {
               </span>
               <span
                 style={{
-                  fontSize: "16px",
+                  fontSize: isMobile ? "12px" : "16px",
                   color: "rgba(255,255,255,0.25)",
                   fontWeight: 300,
                 }}
@@ -330,7 +358,7 @@ const ScrollStackSection: React.FC = () => {
               </span>
               <span
                 style={{
-                  fontSize: "16px",
+                  fontSize: isMobile ? "12px" : "16px",
                   color: "rgba(255,255,255,0.35)",
                   fontWeight: 400,
                   fontVariantNumeric: "tabular-nums",
@@ -348,7 +376,7 @@ const ScrollStackSection: React.FC = () => {
             position: "relative",
             width: "100%",
             height: "100%",
-            padding: `${CARD_MARGIN}px`,
+            padding: `${CARD_MARGIN_RESPONSIVE}px`,
           }}
         >
           {projects.map((project, i) => (
@@ -357,10 +385,10 @@ const ScrollStackSection: React.FC = () => {
               ref={(el) => setCardRef(el, i)}
               style={{
                 position: i === 0 ? "relative" : "absolute",
-                top: i === 0 ? 0 : `${CARD_MARGIN}px`,
-                left: i === 0 ? undefined : `${CARD_MARGIN}px`,
-                right: i === 0 ? undefined : `${CARD_MARGIN}px`,
-                bottom: i === 0 ? undefined : `${CARD_MARGIN}px`,
+                top: i === 0 ? 0 : `${CARD_MARGIN_RESPONSIVE}px`,
+                left: i === 0 ? undefined : `${CARD_MARGIN_RESPONSIVE}px`,
+                right: i === 0 ? undefined : `${CARD_MARGIN_RESPONSIVE}px`,
+                bottom: i === 0 ? undefined : `${CARD_MARGIN_RESPONSIVE}px`,
                 width: i === 0 ? "100%" : undefined,
                 height: i === 0 ? "100%" : undefined,
                 opacity: i === 0 ? 1 : 0,
@@ -379,6 +407,7 @@ const ScrollStackSection: React.FC = () => {
                 index={i}
                 total={projects.length}
                 gradient={cardGradients[i]}
+                backgroundImage={cardBackgroundImages[i]}
               />
             </div>
           ))}
