@@ -7,7 +7,7 @@ import Image from "next/image";
 
 const images = [
   {
-    src: "/images/carousel-1.png",
+    src: "/frames-01/ezgif-frame-001.jpg",
     alt: "Design 1",
     label: "Make this design real",
   },
