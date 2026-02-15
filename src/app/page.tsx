@@ -11,22 +11,22 @@ export default function Home() {
   return (
     <main>
       <Navbar />
-      <div id="hero">
+      <div id="hero" style={{ scrollSnapAlign: "start" }}>
         <Hero />
       </div>
-      <div id="projects">
+      <div id="projects" style={{ scrollSnapAlign: "start" }}>
         <ScrollStackSection />
       </div>
       <div id="services" style={{ scrollSnapAlign: "start" }}>
         <CoreCapabilities />
       </div>
-      <div id="testimonials">
+      <div id="testimonials" style={{ scrollSnapAlign: "start" }}>
         <Testimonials />
       </div>
-      <div id="teams">
+      <div id="teams" style={{ scrollSnapAlign: "start" }}>
         <BuiltForTeams />
       </div>
-      <div id="contact">
+      <div id="contact" style={{ scrollSnapAlign: "start" }}>
         <CalSchedule />
       </div>
       <Footer />
