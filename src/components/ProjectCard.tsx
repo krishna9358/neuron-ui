@@ -3,6 +3,18 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
+// Hook: window width for responsive layout
+function useWindowWidth() {
+  const [w, setW] = useState(1024);
+  useEffect(() => {
+    const u = () => setW(window.innerWidth);
+    u();
+    window.addEventListener("resize", u);
+    return () => window.removeEventListener("resize", u);
+  }, []);
+  return w;
+}
+
 export interface ProjectData {
   title: string;
   description: string;
@@ -23,79 +35,142 @@ interface ProjectCardProps {
   backgroundImage?: string;
 }
 
-// ── Wavy hover link (per-character wave, same as Navbar) ──────────────────
-const WavyLink: React.FC<{
+// ── Wavy hover text (per-character wave) ──────────────────────────────────
+const WavyText: React.FC<{
   text: string;
-  href: string;
-  icon?: React.ReactNode;
-}> = ({ text, href, icon }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const characters = text.split("");
+  href?: string;
+  onClick?: () => void;
+  fontSize?: string;
+  color?: string;
+  hoverColor?: string;
+  fontFamily?: string;
+  fontWeight?: number;
+  letterSpacing?: string;
+  border?: boolean;
+}> = ({
+  text,
+  href,
+  onClick,
+  fontSize = "11px",
+  color = "#fff",
+  hoverColor,
+  fontFamily,
+  fontWeight = 600,
+  letterSpacing = "2px",
+  border = false,
+}) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const characters = text.split("");
+    const h = parseInt(fontSize) + 4;
 
-  return (
-    <motion.a
-      href={href}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "10px",
-        fontSize: "11px",
-        fontWeight: 600,
-        letterSpacing: "2px",
-        textTransform: "uppercase",
-        color: "#fff",
-        textDecoration: "none",
-        cursor: "pointer",
-        padding: "12px 24px",
-        border: "1px solid rgba(255,255,255,0.15)",
-        borderRadius: "30px",
-        width: "fit-content",
-        transition: "border-color 0.3s ease",
-      }}
-    >
+    const inner = (
       <span
         style={{
           display: "inline-flex",
-          height: "14px",
-          overflow: "hidden",
+          alignItems: "center",
+          gap: border ? "10px" : undefined,
+          padding: border ? "12px 24px" : undefined,
+          border: border ? "1px solid rgba(255,255,255,0.15)" : undefined,
+          borderRadius: border ? "30px" : undefined,
+          cursor: "pointer",
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <span
+          style={{
+            display: "inline-flex",
+            height: `${h}px`,
+            overflow: "hidden",
+          }}
+        >
+          {characters.map((char, i) => (
+            <span
+              key={i}
+              style={{
+                display: "inline-block",
+                overflow: "hidden",
+                height: `${h}px`,
+                width: char === " " ? Math.max(parseInt(fontSize) * 0.35, 4) + "px" : undefined,
+              }}
+            >
+              <motion.span
+                animate={{ y: isHovered ? -h : 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 25,
+                  delay: i * 0.025,
+                }}
+                style={{ display: "block", lineHeight: `${h}px` }}
+              >
+                <span
+                  style={{
+                    display: "block",
+                    height: `${h}px`,
+                    fontSize,
+                    fontWeight,
+                    letterSpacing,
+                    textTransform: "uppercase",
+                    color: hoverColor && isHovered ? hoverColor : color,
+                    fontFamily,
+                    transition: "color 0.2s",
+                  }}
+                >
+                  {char === " " ? "\u00A0" : char}
+                </span>
+                <span
+                  style={{
+                    display: "block",
+                    height: `${h}px`,
+                    fontSize,
+                    fontWeight,
+                    letterSpacing,
+                    textTransform: "uppercase",
+                    color: hoverColor || color,
+                    fontFamily,
+                  }}
+                >
+                  {char === " " ? "\u00A0" : char}
+                </span>
+              </motion.span>
+            </span>
+          ))}
+        </span>
+      </span>
+    );
+
+    if (href) {
+      return (
+        <a
+          href={href}
+          target={href.startsWith("http") ? "_blank" : undefined}
+          rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+          style={{ textDecoration: "none", color: "inherit" }}
+          onClick={onClick}
+        >
+          {inner}
+        </a>
+      );
+    }
+
+    return (
+      <button
+        onClick={onClick}
+        style={{
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          color: "inherit",
         }}
       >
-        {characters.map((char, i) => (
-          <span
-            key={i}
-            style={{
-              display: "inline-block",
-              overflow: "hidden",
-              height: "14px",
-              width: char === " " ? "4px" : undefined,
-            }}
-          >
-            <motion.span
-              animate={{ y: isHovered ? -14 : 0 }}
-              transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 25,
-                delay: i * 0.025,
-              }}
-              style={{ display: "block", lineHeight: "14px" }}
-            >
-              <span style={{ display: "block", height: "14px" }}>
-                {char === " " ? "\u00A0" : char}
-              </span>
-              <span style={{ display: "block", height: "14px" }}>
-                {char === " " ? "\u00A0" : char}
-              </span>
-            </motion.span>
-          </span>
-        ))}
-      </span>
-      {icon}
-    </motion.a>
-  );
-};
+        {inner}
+      </button>
+    );
+  };
+
+
 
 // ── Stacked Website Mockup Cards ──────────────────────────────────────────
 const StackedMockupCards: React.FC<{ title: string }> = ({ title }) => {
@@ -135,21 +210,18 @@ const StackedMockupCards: React.FC<{ title: string }> = ({ title }) => {
         let rotateZ = 0;
 
         if (offset === 0) {
-          // Active card (front)
           yOff = 0;
           scaleVal = 1;
           opacityVal = 1;
           zIdx = 3;
           rotateZ = 0;
         } else if (offset === 1) {
-          // Behind 1 — peek from top
           yOff = -16;
           scaleVal = 0.94;
           opacityVal = 0.7;
           zIdx = 2;
           rotateZ = -1;
         } else {
-          // Behind 2 — peek further
           yOff = -30;
           scaleVal = 0.88;
           opacityVal = 0.4;
@@ -186,7 +258,6 @@ const StackedMockupCards: React.FC<{ title: string }> = ({ title }) => {
                   : "0 6px 24px rgba(0,0,0,0.15)",
             }}
           >
-            {/* White card — website mockup with dark text */}
             <div
               style={{
                 width: "100%",
@@ -196,7 +267,7 @@ const StackedMockupCards: React.FC<{ title: string }> = ({ title }) => {
                 color: "#1a1a1a",
               }}
             >
-              {/* Mini navigation bar */}
+              {/* Mini nav */}
               <div
                 style={{
                   display: "flex",
@@ -270,7 +341,7 @@ const StackedMockupCards: React.FC<{ title: string }> = ({ title }) => {
                 </p>
               </div>
 
-              {/* Bottom section with image placeholder */}
+              {/* Bottom image area */}
               <div
                 style={{
                   height: "40%",
@@ -280,7 +351,6 @@ const StackedMockupCards: React.FC<{ title: string }> = ({ title }) => {
                   overflow: "hidden",
                 }}
               >
-                {/* Shimmer / mock image */}
                 <div
                   style={{
                     position: "absolute",
@@ -311,6 +381,8 @@ const StackedMockupCards: React.FC<{ title: string }> = ({ title }) => {
   );
 };
 
+
+
 // ── Main ProjectCard Component ────────────────────────────────────────────
 const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
@@ -329,6 +401,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     category = "ECOMMERCE WEBSITE",
   } = project;
 
+  const windowWidth = useWindowWidth();
+
   return (
     <div
       style={{
@@ -340,13 +414,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        padding: "36px 40px 32px",
+        padding: windowWidth < 768 ? "20px 16px 16px" : "36px 40px 32px",
         color: "#fff",
         boxShadow:
           "0 4px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03)",
       }}
     >
-      {/* Background image layer (e.g. last Hero frame for seamless transition) */}
+      {/* Background image layer */}
       {backgroundImage && (
         <>
           <div
@@ -375,7 +449,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         </>
       )}
 
-      {/* Background noise texture */}
+      {/* Noise texture */}
       <div
         style={{
           position: "absolute",
@@ -398,7 +472,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           marginBottom: "auto",
         }}
       >
-        {/* Right side: Category + Tags + Menu icon */}
+        {/* Right side: Category + Tags */}
         <div
           style={{
             display: "flex",
@@ -407,7 +481,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             gap: "10px",
           }}
         >
-          {/* Category label */}
           <span
             style={{
               fontSize: "11px",
@@ -420,7 +493,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             {category}
           </span>
 
-          {/* Tags as inline text with dots */}
           <div
             style={{
               display: "flex",
@@ -456,7 +528,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             ))}
           </div>
 
-          {/* Separator line */}
           <div
             style={{
               width: "100%",
@@ -467,8 +538,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           />
         </div>
 
-        {/* Menu icon (far right) */}
-        <div
+        {/* Decorative menu icon */}
+        {/* <div
           style={{
             marginLeft: "24px",
             display: "flex",
@@ -488,7 +559,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               }}
             />
           ))}
-        </div>
+        </div> */}
       </div>
 
       {/* ═══════════ MAIN CONTENT (bottom area) ═══════════ */}
@@ -497,8 +568,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           position: "relative",
           zIndex: 2,
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "40px",
+          gridTemplateColumns: windowWidth < 768 ? "1fr" : "1fr 1fr",
+          gap: windowWidth < 768 ? "24px" : "40px",
           alignItems: "end",
           flex: 1,
         }}
@@ -536,39 +607,30 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           >
             {description}
           </p>
-          <WavyLink
+          <WavyText
             text="VISIT SITE"
             href={project.siteUrl || "#"}
-            icon={
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M7 17L17 7" />
-                <path d="M7 7h10v10" />
-              </svg>
-            }
+            fontSize="11px"
+            border
           />
         </div>
 
-        {/* Right column: Stacked mockup cards */}
-        <div
-          style={{
-            position: "relative",
-            height: "100%",
-            minHeight: "280px",
-            maxHeight: "380px",
-          }}
-        >
-          <StackedMockupCards title={title} />
-        </div>
+        {/* Right column: Stacked mockup cards (hidden on small mobile) */}
+        {windowWidth >= 600 && (
+          <div
+            style={{
+              position: "relative",
+              height: "100%",
+              minHeight: "220px",
+              maxHeight: "380px",
+            }}
+          >
+            <StackedMockupCards title={title} />
+          </div>
+        )}
       </div>
+
+
     </div>
   );
 };

@@ -2,6 +2,18 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
+// Hook: window width for responsive layout
+function useWindowWidth() {
+  const [w, setW] = useState(1024);
+  useEffect(() => {
+    const u = () => setW(window.innerWidth);
+    u();
+    window.addEventListener("resize", u);
+    return () => window.removeEventListener("resize", u);
+  }, []);
+  return w;
+}
+
 // ── Color palette (matching reference) ──
 const PALETTE = {
   teal: "#459a85",
@@ -126,14 +138,14 @@ const tabContent: Record<TabType, BubbleItem[]> = {
   SERVICES: SERVICES_ITEMS,
 };
 
-function getBubbleDimensions(item: BubbleItem) {
+function getBubbleDimensions(item: BubbleItem, isMobile: boolean) {
   const isEmoji = item.type === "emoji";
-  const letterWidth = 10;
-  const padding = isEmoji ? 40 : 50;
+  const letterWidth = isMobile ? 8 : 10;
+  const padding = isEmoji ? (isMobile ? 30 : 40) : (isMobile ? 36 : 50);
   const width = isEmoji
-    ? 60
-    : Math.max(80, item.text.length * letterWidth + padding);
-  return { width, height: 60 };
+    ? (isMobile ? 46 : 60)
+    : Math.max(isMobile ? 60 : 80, item.text.length * letterWidth + padding);
+  return { width, height: isMobile ? 44 : 60 };
 }
 
 const CoreCapabilities: React.FC = () => {
@@ -149,6 +161,8 @@ const CoreCapabilities: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("CORE CAPABILITIES");
   const [matterLoaded, setMatterLoaded] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const windowWidth = useWindowWidth();
+  const isMobile = windowWidth > 0 && windowWidth < 768;
 
   // Load Matter.js dynamically (avoids SSR issues)
   useEffect(() => {
@@ -219,7 +233,7 @@ const CoreCapabilities: React.FC = () => {
 
     // Create bubble bodies for current tab
     const items = tabContent[activeTab];
-    const dims = items.map((item) => getBubbleDimensions(item));
+    const dims = items.map((item) => getBubbleDimensions(item, isMobile));
 
     const bubbleBodies = items.map((_item: BubbleItem, i: number) => {
       const { width: bw, height: bh } = dims[i];
@@ -268,14 +282,14 @@ const CoreCapabilities: React.FC = () => {
       Runner.stop(runner);
       Engine.clear(engine);
     };
-  }, [matterLoaded, activeTab, isVisible]);
+  }, [matterLoaded, activeTab, isVisible, isMobile]);
 
   // Compute DOM items for rendering
   const items = tabContent[activeTab];
   const domItems = items.map((item, i) => ({
     ...item,
     id: i.toString(),
-    ...getBubbleDimensions(item),
+    ...getBubbleDimensions(item, isMobile),
   }));
 
   return (
@@ -286,7 +300,7 @@ const CoreCapabilities: React.FC = () => {
         width: "100%",
         height: "100vh",
         backgroundColor: "#0a0a0a",
-        padding: "16px",
+        padding: isMobile ? "8px" : "16px",
       }}
     >
       {/* White card container */}
@@ -316,8 +330,11 @@ const CoreCapabilities: React.FC = () => {
           <div
             style={{
               display: "flex",
-              gap: "32px",
+              gap: isMobile ? "12px" : "32px",
               alignItems: "center",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              padding: isMobile ? "0 8px" : undefined,
             }}
           >
             {tabs.map((tab) => {
@@ -327,9 +344,9 @@ const CoreCapabilities: React.FC = () => {
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   style={{
-                    fontSize: "12px",
+                    fontSize: isMobile ? "10px" : "12px",
                     fontWeight: isActive ? 700 : 500,
-                    letterSpacing: "2px",
+                    letterSpacing: isMobile ? "1px" : "2px",
                     textTransform: "uppercase",
                     color: isActive ? "#1a1a1a" : "#999",
                     background: "none",
@@ -395,7 +412,7 @@ const CoreCapabilities: React.FC = () => {
                 <span
                   style={{
                     pointerEvents: "none",
-                    fontSize: item.type === "emoji" ? "24px" : "16px",
+                    fontSize: item.type === "emoji" ? (isMobile ? "18px" : "24px") : (isMobile ? "13px" : "16px"),
                     fontWeight: item.type === "text" ? 500 : 400,
                     letterSpacing: item.type === "text" ? "0.5px" : "0",
                   }}

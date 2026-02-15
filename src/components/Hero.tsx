@@ -13,6 +13,13 @@ const CARD_WIDTH = 340;
 const CARD_HEIGHT = CARD_WIDTH * (10 / 16); // 212.5px
 const CARD_RADIUS = 12;
 
+// Use smaller dimensions on mobile for the clip-path zoom
+function getCardDims(w: number) {
+  if (w < 480) return { cw: 200, ch: 200 * (10 / 16) };
+  if (w < 768) return { cw: 260, ch: 260 * (10 / 16) };
+  return { cw: CARD_WIDTH, ch: CARD_HEIGHT };
+}
+
 // Scroll phase boundaries (fraction of total scrollable range)
 const CONTENT_FADE_START = 0.04;
 const CONTENT_FADE_END = 0.15;
@@ -228,8 +235,9 @@ const Hero = () => {
         );
         const zt = easeOutCubic(zr);
 
-        const insetX = lerp((vw - CARD_WIDTH) / 2, 0, zt);
-        const insetY = lerp((vh - CARD_HEIGHT) / 2, 0, zt);
+        const { cw, ch } = getCardDims(vw);
+        const insetX = lerp((vw - cw) / 2, 0, zt);
+        const insetY = lerp((vh - ch) / 2, 0, zt);
         const rad = lerp(CARD_RADIUS, 0, zt);
         canvas.style.clipPath = `inset(${insetY}px ${insetX}px ${insetY}px ${insetX}px round ${rad}px)`;
 
@@ -424,12 +432,13 @@ const Hero = () => {
               zIndex: 10,
               width: "100%",
               maxWidth: "1100px",
-              height: "55vh",
+              height: "45vh",
+              minHeight: "200px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              marginTop: "100px",
-              top: "70px",
+              marginTop: "60px",
+              top: "40px",
             }}
           >
             <Carousel />
@@ -451,21 +460,22 @@ const Hero = () => {
             <p
               style={{
                 color: "#555",
-                fontSize: "18px",
+                fontSize: "clamp(14px, 2.5vw, 18px)",
                 fontWeight: 400,
                 letterSpacing: "0.3px",
+                textAlign: "center",
               }}
             >
               A new way to design for the real world
             </p>
-            <div style={{ display: "flex", gap: "12px" }}>
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
               <button
                 style={{
                   backgroundColor: "#1145A0",
                   color: "#fff",
-                  fontSize: "14px",
+                  fontSize: "clamp(12px, 2vw, 14px)",
                   fontWeight: 600,
-                  padding: "12px 28px",
+                  padding: "10px 24px",
                   borderRadius: "8px",
                   border: "none",
                   cursor: "pointer",
@@ -484,9 +494,9 @@ const Hero = () => {
                 style={{
                   backgroundColor: "#fff",
                   color: "#1145A0",
-                  fontSize: "14px",
+                  fontSize: "clamp(12px, 2vw, 14px)",
                   fontWeight: 600,
-                  padding: "12px 28px",
+                  padding: "10px 24px",
                   borderRadius: "8px",
                   border: "1.5px solid #1145A0",
                   cursor: "pointer",

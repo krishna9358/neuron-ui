@@ -12,21 +12,23 @@ const CalSchedule: React.FC = () => {
         width: "100%",
         minHeight: "100vh",
         backgroundColor: "#0a0a0a",
-        // padding: "60px 16px 80px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        padding: "0 16px 40px",
+        gap: "0",
       }}
     >
 
-
+      {/* ── Cal.com embed ──────────────────────────────────────── */}
       <iframe
         src={`https://cal.com/${CAL_LINK}?embed&theme=dark&layout=month_view`}
         style={{
           width: "100%",
           maxWidth: "1000px",
-          height: "600px",
+          height: "min(600px, 70vh)",
+          minHeight: "350px",
           border: "none",
           borderRadius: "16px",
           colorScheme: "dark",
@@ -34,7 +36,6 @@ const CalSchedule: React.FC = () => {
         loading="lazy"
         allow="payment"
       />
-
     </section>
   );
 };

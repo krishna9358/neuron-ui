@@ -4,28 +4,159 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
-const navLinks = [
-  { name: "Projects", href: "#" },
-  { name: "About us", href: "#" },
-  { name: "Features", href: "#" },
-  { name: "Pricing", href: "#" },
-  { name: "Testimonials", href: "#" },
+// ── Hook: track window width for responsive logic ──────────────────────
+function useWindowWidth() {
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const update = () => setWidth(window.innerWidth);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return width;
+}
+
+// ── Menu items for the fullscreen overlay ──────────────────────────────────
+const menuItems = [
+  { name: "Home", href: "#hero" },
+  { name: "Projects", href: "#projects" },
+  { name: "About Me", href: "#about" },
+  { name: "Services & Capabilities", href: "#capabilities" },
+  { name: "Contact", href: "#contact" },
 ];
 
-// -----------------------------------------------------------------------------
-// Animated NavLink with loop/wave effect (per-character split)
-// -----------------------------------------------------------------------------
-function NavLink({
+// ── Wavy menu link (large, per-character spring wave) ──────────────────────
+function WavyMenuLink({
   name,
   href,
-  isMobile = false,
+  index,
+  onClose,
 }: {
   name: string;
   href: string;
-  isMobile?: boolean; // Prop to adjust for mobile sizing
+  index: number;
+  onClose: () => void;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const characters = name.split("");
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const lineH = isMobile ? 40 : 56;
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onClose();
+
+    // Scroll to section after overlay closes
+    setTimeout(() => {
+      const el = document.querySelector(href);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      } else if (href === "#hero") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }, 400);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -40 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{
+        delay: 0.15 + index * 0.07,
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+    >
+      <a
+        href={href}
+        onClick={handleClick}
+        style={{
+          textDecoration: "none",
+          color: "inherit",
+          display: "block",
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <span
+          style={{
+            display: "inline-flex",
+            height: `${lineH}px`,
+            overflow: "hidden",
+            cursor: "pointer",
+          }}
+        >
+          {characters.map((char, i) => (
+            <span
+              key={i}
+              style={{
+                display: "inline-block",
+                overflow: "hidden",
+                height: `${lineH}px`,
+                width: char === " " ? "16px" : undefined,
+              }}
+            >
+              <motion.span
+                animate={{ y: isHovered ? -lineH : 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 350,
+                  damping: 25,
+                  delay: i * 0.02,
+                }}
+                style={{
+                  display: "block",
+                  lineHeight: `${lineH}px`,
+                }}
+              >
+                <span
+                  style={{
+                    display: "block",
+                    height: `${lineH}px`,
+                    fontSize: "clamp(24px, 5vw, 48px)",
+                    fontWeight: 500,
+                    letterSpacing: "3px",
+                    textTransform: "uppercase",
+                    color: isHovered
+                      ? "#fff"
+                      : "rgba(255,255,255,0.45)",
+                    fontFamily:
+                      "'SF Mono', 'Fira Code', 'Cascadia Code', monospace",
+                    transition: "color 0.15s",
+                  }}
+                >
+                  {char === " " ? "\u00A0" : char}
+                </span>
+                <span
+                  style={{
+                    display: "block",
+                    height: `${lineH}px`,
+                    fontSize: "clamp(24px, 5vw, 48px)",
+                    fontWeight: 500,
+                    letterSpacing: isMobile ? "1px" : "3px",
+                    textTransform: "uppercase",
+                    color: "#fff",
+                    fontFamily:
+                      "'SF Mono', 'Fira Code', 'Cascadia Code', monospace",
+                  }}
+                >
+                  {char === " " ? "\u00A0" : char}
+                </span>
+              </motion.span>
+            </span>
+          ))}
+        </span>
+      </a>
+    </motion.div>
+  );
+}
+
+// ── Small wavy nav link (for the top bar) ──────────────────────────────────
+function NavLink({ name, href }: { name: string; href: string }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const characters = name.split("");
+  const lineH = 20;
 
   return (
     <Link
@@ -33,13 +164,12 @@ function NavLink({
       style={{
         position: "relative",
         color: isHovered ? "#fff" : "#ccc",
-        fontSize: isMobile ? "24px" : "14px", // Bigger font on mobile
-        fontWeight: isMobile ? 600 : 500,
+        fontSize: "14px",
+        fontWeight: 500,
         textDecoration: "none",
         display: "inline-flex",
-        height: isMobile ? "32px" : "20px", // Taller on mobile
+        height: `${lineH}px`,
         alignItems: "center",
-        justifyContent: isMobile ? "center" : "flex-start",
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -50,35 +180,24 @@ function NavLink({
           style={{
             display: "inline-block",
             overflow: "hidden",
-            height: isMobile ? "32px" : "20px",
-            // preserve whitespace width for spaces
-            width: char === " " ? (isMobile ? "6px" : "4px") : undefined,
+            height: `${lineH}px`,
+            width: char === " " ? "4px" : undefined,
           }}
         >
-          {/* Both copies move together — no desync */}
           <motion.span
-            animate={{ y: isHovered ? (isMobile ? -32 : -20) : 0 }}
+            animate={{ y: isHovered ? -lineH : 0 }}
             transition={{
               type: "spring",
               stiffness: 400,
               damping: 25,
               delay: i * 0.025,
             }}
-            style={{
-              display: "block",
-              lineHeight: isMobile ? "32px" : "20px",
-            }}
+            style={{ display: "block", lineHeight: `${lineH}px` }}
           >
-            {/* Current character */}
-            <span
-              style={{ display: "block", height: isMobile ? "32px" : "20px" }}
-            >
+            <span style={{ display: "block", height: `${lineH}px` }}>
               {char === " " ? "\u00A0" : char}
             </span>
-            {/* Duplicate character */}
-            <span
-              style={{ display: "block", height: isMobile ? "32px" : "20px" }}
-            >
+            <span style={{ display: "block", height: `${lineH}px` }}>
               {char === " " ? "\u00A0" : char}
             </span>
           </motion.span>
@@ -88,60 +207,211 @@ function NavLink({
   );
 }
 
-// -----------------------------------------------------------------------------
-// Hamburger Icon Component
-// -----------------------------------------------------------------------------
-function HamburgerIcon({ isOpen }: { isOpen: boolean }) {
+// ── Animated Hamburger (4 lines → X morph) ─────────────────────────────────
+function HamburgerButton({
+  isOpen,
+  onClick,
+}: {
+  isOpen: boolean;
+  onClick: () => void;
+}) {
   return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="#fff"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <motion.button
+      onClick={onClick}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      style={{
+        background: "transparent",
+        border: "none",
+        cursor: "pointer",
+        padding: "6px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "4px",
+        zIndex: 201,
+        position: "relative",
+      }}
+      aria-label={isOpen ? "Close menu" : "Open menu"}
     >
-      <motion.path
-        animate={isOpen ? { d: "M18 6L6 18" } : { d: "M4 6h16" }}
-        transition={{ duration: 0.3 }}
-      />
-      <motion.path
-        animate={isOpen ? { opacity: 0 } : { opacity: 1, d: "M4 12h16" }}
-        transition={{ duration: 0.3 }}
-      />
-      <motion.path
-        animate={isOpen ? { d: "M6 6l12 12" } : { d: "M4 18h16" }}
-        transition={{ duration: 0.3 }}
-      />
-    </svg>
+      {[0, 1, 2, 3].map((i) => (
+        <motion.div
+          key={i}
+          animate={{
+            rotate: isOpen ? (i === 0 || i === 1 ? 45 : -45) : 0,
+            opacity: isOpen && (i === 1 || i === 2) ? 0 : 1,
+            y: isOpen ? (i === 0 ? 8 : i === 3 ? -8 : 0) : 0,
+            width: isOpen ? 20 : i === 1 || i === 2 ? 14 : 20,
+          }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            height: "1.5px",
+            backgroundColor: "#fff",
+            borderRadius: "2px",
+            transformOrigin: "center",
+          }}
+        />
+      ))}
+    </motion.button>
   );
 }
 
-// -----------------------------------------------------------------------------
-// Navbar Component — hides with animation when frames start in Hero
-// -----------------------------------------------------------------------------
-export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isHidden, setIsHidden] = useState(false);
-
-  // Handle Resize for Responsive Layout
+// ── Fullscreen Menu Overlay ────────────────────────────────────────────────
+function FullscreenMenuOverlay({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  // Lock body scroll when menu is open
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setIsMobile(true);
-      } else {
-        setIsMobile(false);
-        setIsOpen(false); // Close menu on resize to desktop
-      }
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
     };
+  }, [isOpen]);
 
-    handleResize(); // Initial check
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 199,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          {/* Blurred dark backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(10, 10, 10, 0.85)",
+              backdropFilter: "blur(40px)",
+              WebkitBackdropFilter: "blur(40px)",
+            }}
+          />
+
+          {/* Subtle gradient accent */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              width: "50%",
+              height: "100%",
+              background:
+                "radial-gradient(ellipse at top right, rgba(17, 69, 160, 0.08) 0%, transparent 60%)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* Menu content */}
+          <div
+            style={{
+              position: "relative",
+              zIndex: 200,
+              padding: "100px 24px 40px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+              // maxWidth: "1400px",
+            }}
+          >
+            {/* Section label */}
+            <motion.span
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 0.1, duration: 0.3 }}
+              style={{
+                fontSize: "10px",
+                fontWeight: 600,
+                letterSpacing: "4px",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.2)",
+                marginBottom: "24px",
+                paddingLeft: "4px",
+              }}
+            >
+              NAVIGATION
+            </motion.span>
+
+            {/* Menu links */}
+            {menuItems.map((item, i) => (
+              <WavyMenuLink
+                key={item.name}
+                name={item.name}
+                href={item.href}
+                index={i}
+                onClose={onClose}
+              />
+            ))}
+
+            {/* Bottom info row */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 0.55, duration: 0.3 }}
+              style={{
+                marginTop: "48px",
+                paddingTop: "24px",
+                borderTop: "1px solid rgba(255,255,255,0.06)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "11px",
+                  letterSpacing: "2px",
+                  color: "rgba(255,255,255,0.25)",
+                  textTransform: "uppercase",
+                }}
+              >
+                hello@neuronui.com
+              </span>
+              <span
+                style={{
+                  fontSize: "11px",
+                  letterSpacing: "2px",
+                  color: "rgba(255,255,255,0.25)",
+                  textTransform: "uppercase",
+                }}
+              >
+                © {new Date().getFullYear()} NeuronUI
+              </span>
+            </motion.div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ── Main Navbar ────────────────────────────────────────────────────────────
+export default function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+  const windowWidth = useWindowWidth();
+  const isMobile = windowWidth > 0 && windowWidth < 768;
 
   // Listen for custom event to hide navbar when Hero frames start
   useEffect(() => {
@@ -159,6 +429,7 @@ export default function Navbar() {
 
   return (
     <>
+      {/* ─── Standard Navbar (visible during Hero only) ─── */}
       <motion.nav
         initial={{ y: 0, x: "-50%", opacity: 1 }}
         animate={{
@@ -174,7 +445,7 @@ export default function Navbar() {
           position: "fixed",
           top: "16px",
           left: "50%",
-          zIndex: 100,
+          zIndex: 200,
           width: "92%",
           maxWidth: "900px",
           backgroundColor: "#1a1a1a",
@@ -201,122 +472,75 @@ export default function Navbar() {
           NeuronUI
         </Link>
 
-        {/* Desktop Links & Actions */}
+        {/* Center links (hidden on mobile) */}
         {!isMobile && (
-          <>
-            <div style={{ display: "flex", alignItems: "center", gap: "28px" }}>
-              {navLinks.map((link) => (
-                <NavLink key={link.name} name={link.name} href={link.href} />
-              ))}
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-              <Link
-                href="#"
-                style={{
-                  backgroundColor: "#1145A0",
-                  color: "#fff",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  padding: "8px 20px",
-                  borderRadius: "8px",
-                  textDecoration: "none",
-                  transition: "background 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#0d3680")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#1145A0")
-                }
-              >
-                Book a Demo
-              </Link>
-            </div>
-          </>
-        )}
-
-        {/* Mobile Hamburger Toggle */}
-        {isMobile && (
-          <button
-            onClick={() => setIsOpen(!isOpen)}
+          <div
             style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              padding: "4px",
-              zIndex: 101, // Ensure it's clickable
+              display: "flex",
+              alignItems: "center",
+              gap: "28px",
             }}
           >
-            <HamburgerIcon isOpen={isOpen} />
-          </button>
+            <NavLink name="Projects" href="#projects" />
+            <NavLink name="About us" href="#about" />
+            <NavLink name="Pricing" href="#" />
+          </div>
         )}
+
+        {/* CTA (hidden on mobile) */}
+        {!isMobile ? (
+          <Link
+            href="#contact"
+            style={{
+              backgroundColor: "#1145A0",
+              color: "#fff",
+              fontSize: "13px",
+              fontWeight: 600,
+              padding: "8px 20px",
+              borderRadius: "8px",
+              textDecoration: "none",
+              transition: "background 0.2s",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#0d3680")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "#1145A0")
+            }
+          >
+            Book a Demo
+          </Link>
+        ) : <div />}
       </motion.nav>
 
-      {/* Mobile Menu Overlay */}
+      {/* ─── Standalone Hamburger (appears when scrolled past hero) ─── */}
       <AnimatePresence>
-        {isMobile && isOpen && (
+        {(isHidden || menuOpen) && (
           <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95, x: "-50%" }}
-            animate={{ opacity: 1, y: 0, scale: 1, x: "-50%" }}
-            exit={{ opacity: 0, y: -20, scale: 0.95, x: "-50%" }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             style={{
               position: "fixed",
-              top: "80px",
-              left: "50%",
-              width: "90%", // Slightly smaller than nav
-              maxWidth: "400px",
-              backgroundColor: "rgba(26, 26, 26, 0.95)", // Re-added transparency for backdrop filter effect
-              backdropFilter: "blur(12px)",
-              borderRadius: "16px",
-              padding: "32px 20px",
-              zIndex: 99,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "20px",
-              border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+              top: isMobile ? "16px" : "24px",
+              right: isMobile ? "16px" : "32px",
+              zIndex: 300,
             }}
           >
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.name}
-                name={link.name}
-                href={link.href}
-                isMobile={true}
-              />
-            ))}
-
-            <div
-              style={{
-                width: "100%",
-                height: "1px",
-                backgroundColor: "rgba(255,255,255,0.1)",
-                margin: "10px 0",
-              }}
+            <HamburgerButton
+              isOpen={menuOpen}
+              onClick={() => setMenuOpen(!menuOpen)}
             />
-
-            <Link
-              href="#"
-              style={{
-                backgroundColor: "#1145A0",
-                color: "#fff",
-                fontSize: "16px",
-                fontWeight: 600,
-                padding: "12px 0",
-                width: "100%",
-                textAlign: "center",
-                borderRadius: "10px",
-                textDecoration: "none",
-              }}
-            >
-              Book a Demo
-            </Link>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ─── Fullscreen Menu Overlay ─── */}
+      <FullscreenMenuOverlay
+        isOpen={menuOpen}
+        onClose={() => setMenuOpen(false)}
+      />
     </>
   );
 }
