@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import ProjectCard, { type ProjectData } from "./ProjectCard";
 
 const projects: ProjectData[] = [
@@ -9,32 +9,36 @@ const projects: ProjectData[] = [
     description:
       "A demo e-commerce website for women's fashion, featuring product listings, cart functionality, and user authentication. Built using Next.js and the Shopify Storefront API.",
     hash: "EC4TM4BC50NS6A000",
-    tags: ["NATTNS", "SHOPIFY", "STOREFRONT", "API", "GRID"],
+    tags: ["NEXTJS", "SHOPIFY STOREFRONT API", "GSAP"],
     creditLabel: "Content Earth",
+    category: "ECOMMERCE WEBSITE",
   },
   {
     title: "Aetheria",
     description:
       "An immersive portfolio experience for creative agencies, with smooth page transitions, 3D elements, and a dynamic project showcase. Powered by Three.js and GSAP.",
     hash: "7F2BA9DC41E8F3B02",
-    tags: ["THREE.JS", "GSAP", "WEBGL", "PORTFOLIO", "CMS"],
+    tags: ["THREE.JS", "GSAP", "WEBGL"],
     creditLabel: "Digital Nomad",
+    category: "PORTFOLIO EXPERIENCE",
   },
   {
     title: "Nocturn",
     description:
       "A real-time analytics dashboard for SaaS products, offering live metrics, custom report builders, and team collaboration features. Built with React and D3.js.",
     hash: "A91CD5E823FA07D44",
-    tags: ["REACT", "D3.JS", "WEBSOCKET", "DASHBOARD", "API"],
+    tags: ["REACT", "D3.JS", "WEBSOCKET"],
     creditLabel: "Metric Labs",
+    category: "ANALYTICS DASHBOARD",
   },
   {
     title: "Verdant",
     description:
       "A sustainable marketplace connecting local artisans with conscious consumers. Features include carbon tracking, artisan profiles, and curated collections.",
     hash: "3E8F1C6DA20B94E77",
-    tags: ["NEXT.JS", "STRIPE", "PRISMA", "MARKETPLACE", "ECO"],
+    tags: ["NEXT.JS", "STRIPE", "PRISMA"],
     creditLabel: "Green Studio",
+    category: "SUSTAINABLE MARKETPLACE",
   },
 ];
 
@@ -44,57 +48,73 @@ const EXTRA_VH = 40;
 const TOTAL_HEIGHT_VH = projects.length * VH_PER_CARD + EXTRA_VH;
 const TOTAL_CARDS = projects.length;
 
+// ── Progress circle config (larger, like reference image) ─────────────────
+const PROGRESS_SIZE = 140;
+const PROGRESS_RADIUS = 60;
+const PROGRESS_CIRCUMFERENCE = 2 * Math.PI * PROGRESS_RADIUS;
+
 function clamp01(v: number) {
   return Math.max(0, Math.min(1, v));
 }
-function easeOutCubic(t: number) {
-  return 1 - (1 - t) ** 3;
+
+// Smoother easing for card transitions
+function easeOutQuart(t: number) {
+  return 1 - (1 - t) ** 4;
 }
+
+// ── Per-card glassmorphism gradients (semi-transparent for blur to show) ──
+const cardGradients = [
+  "linear-gradient(160deg, rgba(12,26,46,0.75) 0%, rgba(15,31,53,0.7) 40%, rgba(22,45,74,0.65) 100%)",
+  "linear-gradient(160deg, rgba(30,10,46,0.75) 0%, rgba(42,16,64,0.7) 40%, rgba(61,24,96,0.65) 100%)",
+  "linear-gradient(160deg, rgba(10,46,42,0.75) 0%, rgba(14,61,56,0.7) 40%, rgba(20,90,82,0.65) 100%)",
+  "linear-gradient(160deg, rgba(46,26,10,0.75) 0%, rgba(64,40,16,0.7) 40%, rgba(96,64,24,0.65) 100%)",
+];
 
 const ScrollStackSection: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const progressRefs = useRef<(SVGCircleElement | null)[]>([]);
+  const progressCircleRef = useRef<SVGCircleElement>(null);
+  const progressNumberRef = useRef<HTMLSpanElement>(null);
   const rafId = useRef(0);
   const lastProgress = useRef(-1);
+
+  // Track active card for content fade animation
+  const [activeCard, setActiveCard] = useState(0);
 
   const setCardRef = useCallback((el: HTMLDivElement | null, i: number) => {
     cardRefs.current[i] = el;
   }, []);
 
-  const setProgressRef = useCallback(
-    (el: SVGCircleElement | null, i: number) => {
-      progressRefs.current[i] = el;
-    },
-    []
-  );
-
   useEffect(() => {
+    // Smooth interpolation target for scroll progress
+    let currentSmooth = 0;
+    let targetProgress = 0;
+
     const update = () => {
       const section = sectionRef.current;
-      if (!section) return;
+      if (!section) {
+        rafId.current = requestAnimationFrame(update);
+        return;
+      }
 
       const rect = section.getBoundingClientRect();
       const vh = window.innerHeight;
 
-      if (rect.top > 0 || rect.bottom <= vh) {
-        if (rect.top > 0) {
-          cardRefs.current.forEach((card) => {
-            if (card) {
-              card.style.opacity = "0";
-              card.style.transform = "translateY(100%)";
-            }
-          });
-        }
-        return;
-      }
-
       const scrolled = -rect.top;
       const range = section.offsetHeight - vh;
-      const progress = clamp01(scrolled / range);
+      targetProgress = clamp01(scrolled / range);
+
+      // Lerp for smooth interpolation (creates the "slight delay" feel)
+      currentSmooth += (targetProgress - currentSmooth) * 0.08;
+
+      // Use smooth value for animations
+      const progress = currentSmooth;
 
       // Skip if progress hasn't changed significantly (perf optimization)
-      if (Math.abs(progress - lastProgress.current) < 0.0005) return;
+      if (Math.abs(progress - lastProgress.current) < 0.0002) {
+        rafId.current = requestAnimationFrame(update);
+        return;
+      }
       lastProgress.current = progress;
 
       // Compute which card is "active" (most recent one entering)
@@ -107,17 +127,22 @@ const ScrollStackSection: React.FC = () => {
         }
       }
 
-      // Update circular progress indicators
-      const circumference = 2 * Math.PI * 32; // matches radius in ProjectCard
-      for (let i = 0; i < TOTAL_CARDS; i++) {
-        const circle = progressRefs.current[i];
-        if (!circle) continue;
-        // Fill based on how many cards are visible (i+1 / total)
+      // Update React state for active card (for content fade)
+      setActiveCard(activeIdx);
+
+      // ── Update single global progress circle ────────────────────────
+      const circle = progressCircleRef.current;
+      const numSpan = progressNumberRef.current;
+      if (circle) {
         const fillFraction = (activeIdx + 1) / TOTAL_CARDS;
-        const offset = circumference * (1 - fillFraction);
+        const offset = PROGRESS_CIRCUMFERENCE * (1 - fillFraction);
         circle.style.strokeDashoffset = String(offset);
       }
+      if (numSpan) {
+        numSpan.textContent = String(activeIdx + 1).padStart(2, "0");
+      }
 
+      // ── Update card transforms ─────────────────────────────────────
       for (let i = 0; i < TOTAL_CARDS; i++) {
         const card = cardRefs.current[i];
         if (!card) continue;
@@ -127,19 +152,21 @@ const ScrollStackSection: React.FC = () => {
         const cardPhaseLen =
           VH_PER_CARD / (TOTAL_CARDS * VH_PER_CARD + EXTRA_VH);
 
-        if (progress < cardStart) {
+        if (progress < cardStart && i !== 0) {
           card.style.opacity = "0";
           card.style.transform = "translateY(100%)";
           card.style.zIndex = String(i + 1);
         } else {
-          // Enter animation: 60% of the card phase for entrance
-          const enterProgress = clamp01(
+          let enterProgress = clamp01(
             (progress - cardStart) / (cardPhaseLen * 0.5)
           );
-          const easedEnter = easeOutCubic(enterProgress);
+
+          // Force first card to be fully visible immediately
+          if (i === 0) enterProgress = 1;
+
+          const easedEnter = easeOutQuart(enterProgress);
 
           if (i <= activeIdx && enterProgress >= 1) {
-            // Card is fully entered and may be behind active card
             if (i < activeIdx) {
               // Behind: scale down smoothly as next card enters
               const nextStart =
@@ -151,7 +178,7 @@ const ScrollStackSection: React.FC = () => {
               const behindCount = activeIdx - i;
               const targetScale = Math.max(0.85, 1 - behindCount * 0.05);
               const currentScale =
-                1 - (1 - targetScale) * easeOutCubic(nextEnterProgress);
+                1 - (1 - targetScale) * easeOutQuart(nextEnterProgress);
               card.style.transform = `scale(${currentScale})`;
               card.style.transformOrigin = "center top";
               card.style.opacity = String(
@@ -163,7 +190,7 @@ const ScrollStackSection: React.FC = () => {
               card.style.opacity = "1";
             }
           } else {
-            // Entering: slide up from below
+            // Entering: slide up from below with smooth easing
             const yOffset = (1 - easedEnter) * 100;
             card.style.opacity = String(Math.min(1, easedEnter * 2));
             card.style.transform = `translateY(${yOffset}%)`;
@@ -171,18 +198,15 @@ const ScrollStackSection: React.FC = () => {
           card.style.zIndex = String(i + 1);
         }
       }
-    };
 
-    const onScroll = () => {
-      cancelAnimationFrame(rafId.current);
+      // Continue the animation loop
       rafId.current = requestAnimationFrame(update);
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    update();
+    // Start the continuous animation loop (for smooth lerp)
+    rafId.current = requestAnimationFrame(update);
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
       cancelAnimationFrame(rafId.current);
     };
   }, []);
@@ -205,6 +229,120 @@ const ScrollStackSection: React.FC = () => {
           overflow: "hidden",
         }}
       >
+        {/* ── Single Floating Progress Circle (highest z-index) ──────── */}
+        <div
+          style={{
+            position: "absolute",
+            top: "32px",
+            left: "36px",
+            zIndex: 100,
+            width: `${PROGRESS_SIZE}px`,
+            height: `${PROGRESS_SIZE}px`,
+            pointerEvents: "none",
+          }}
+        >
+          <svg
+            width={PROGRESS_SIZE}
+            height={PROGRESS_SIZE}
+            viewBox={`0 0 ${PROGRESS_SIZE} ${PROGRESS_SIZE}`}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              transform: "rotate(-90deg)",
+            }}
+          >
+            {/* Background circle */}
+            <circle
+              cx={PROGRESS_SIZE / 2}
+              cy={PROGRESS_SIZE / 2}
+              r={PROGRESS_RADIUS}
+              fill="none"
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth="1.5"
+            />
+            {/* Progress arc */}
+            <circle
+              ref={progressCircleRef}
+              cx={PROGRESS_SIZE / 2}
+              cy={PROGRESS_SIZE / 2}
+              r={PROGRESS_RADIUS}
+              fill="none"
+              stroke="rgba(255,255,255,0.5)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeDasharray={PROGRESS_CIRCUMFERENCE}
+              strokeDashoffset={PROGRESS_CIRCUMFERENCE}
+              style={{ transition: "stroke-dashoffset 0.6s ease" }}
+            />
+          </svg>
+          {/* Number inside circle */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "2px",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "10px",
+                letterSpacing: "2.5px",
+                color: "rgba(255,255,255,0.4)",
+                fontWeight: 500,
+                textTransform: "uppercase",
+                lineHeight: 1,
+              }}
+            >
+              PROJECT
+            </span>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: "8px",
+              }}
+            >
+              <span
+                ref={progressNumberRef}
+                style={{
+                  fontSize: "28px",
+                  fontWeight: 600,
+                  color: "#fff",
+                  lineHeight: 1,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                01
+              </span>
+              <span
+                style={{
+                  fontSize: "16px",
+                  color: "rgba(255,255,255,0.25)",
+                  fontWeight: 300,
+                }}
+              >
+                |
+              </span>
+              <span
+                style={{
+                  fontSize: "16px",
+                  color: "rgba(255,255,255,0.35)",
+                  fontWeight: 400,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {String(TOTAL_CARDS).padStart(2, "0")}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Card Container ─────────────────────────────────────────── */}
         <div
           style={{
             position: "relative",
@@ -229,13 +367,18 @@ const ScrollStackSection: React.FC = () => {
                 transform: i === 0 ? "none" : "translateY(100%)",
                 willChange: "transform, opacity",
                 zIndex: i + 1,
+                // ── Glassmorphism blur on each card ──
+                borderRadius: "20px",
+                overflow: "hidden",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
               }}
             >
               <ProjectCard
                 project={project}
                 index={i}
                 total={projects.length}
-                progressRef={(el) => setProgressRef(el, i)}
+                gradient={cardGradients[i]}
               />
             </div>
           ))}

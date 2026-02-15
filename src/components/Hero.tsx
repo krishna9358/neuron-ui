@@ -126,6 +126,8 @@ const Hero = () => {
   }, []);
 
   // ── Main scroll handler ───────────────────────────────────────────
+  const navbarHiddenRef = useRef(false);
+
   useEffect(() => {
     if (!isLoaded) return;
     drawFrame(0);
@@ -151,14 +153,21 @@ const Hero = () => {
         canvas.style.filter = "";
         sticky.style.backgroundColor = "#F8F4F1";
         if (pWrap) pWrap.style.opacity = "0";
+        // Show navbar when before the section
+        if (navbarHiddenRef.current) {
+          navbarHiddenRef.current = false;
+          window.dispatchEvent(new Event("navbar:show"));
+        }
         return;
       }
 
       // ── AFTER: section fully scrolled past ──
       if (rect.bottom <= vh) {
         content.style.opacity = "0";
-        canvas.style.opacity = "1";
-        canvas.style.clipPath = "none";
+        // Keep the final zoomed-out state so it doesn't snap back to full-screen
+        canvas.style.clipPath = "inset(30px 40px 30px 40px round 24px)";
+        canvas.style.opacity = "0.6"; // Matches (1 - 1.0 * 0.4)
+        canvas.style.transform = "scale(0.92)"; // Matches (1 - 1.0 * 0.08)
         canvas.style.filter = "none";
         sticky.style.backgroundColor = "#0a0a0a";
         if (frameRef.current !== FRAME_COUNT - 1) {
@@ -166,6 +175,11 @@ const Hero = () => {
           drawFrame(FRAME_COUNT - 1);
         }
         if (pWrap) pWrap.style.opacity = "0";
+        // Keep navbar hidden after the hero
+        if (!navbarHiddenRef.current) {
+          navbarHiddenRef.current = true;
+          window.dispatchEvent(new Event("navbar:hide"));
+        }
         return;
       }
 
@@ -174,6 +188,15 @@ const Hero = () => {
       const range = section.offsetHeight - vh;
       const progress = clamp01(scrolled / range);
 
+      // ── Navbar hide/show based on scroll progress ──
+      if (progress >= CONTENT_FADE_START && !navbarHiddenRef.current) {
+        navbarHiddenRef.current = true;
+        window.dispatchEvent(new Event("navbar:hide"));
+      } else if (progress < CONTENT_FADE_START && navbarHiddenRef.current) {
+        navbarHiddenRef.current = false;
+        window.dispatchEvent(new Event("navbar:show"));
+      }
+
       // ─── Hero content fade ───
       if (progress < CONTENT_FADE_START) {
         content.style.opacity = "1";
@@ -181,7 +204,7 @@ const Hero = () => {
       } else {
         const ft = clamp01(
           (progress - CONTENT_FADE_START) /
-            (CONTENT_FADE_END - CONTENT_FADE_START)
+          (CONTENT_FADE_END - CONTENT_FADE_START)
         );
         content.style.opacity = String(1 - ft);
         content.style.transform = `translateY(${-ft * 60}px) scale(${1 - ft * 0.04})`;

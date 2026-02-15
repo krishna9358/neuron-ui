@@ -349,7 +349,7 @@ const CoreCapabilities: React.FC = () => {
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {isActive ? `( ${tab} )` : tab}
+                  {isActive ? `${tab} ` : tab}
                 </button>
               );
             })}
