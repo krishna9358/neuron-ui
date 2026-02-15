@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Carousel from "./Carousel";
-import Navbar from "./Navbar";
+// Navbar moved to page.tsx to avoid stacking context issues with sticky/overflow:hidden
 
 // ── Config ──────────────────────────────────────────────────────────
 const FRAME_COUNT = 240;
@@ -351,8 +351,7 @@ const Hero = () => {
           backgroundColor: "#F8F4F1",
         }}
       >
-        {/* ──── Navbar (only in Hero section) ──── */}
-        <Navbar />
+        {/* Navbar rendered in page.tsx to stay above all stacking contexts */}
 
         {/* ──── Hero content (fades out on scroll) ──── */}
         <div
