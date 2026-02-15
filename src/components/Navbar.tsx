@@ -91,7 +91,7 @@ export default function Navbar() {
   return (
     <nav
       style={{
-        position: "fixed",
+        position: "absolute",
         top: "16px",
         left: "50%",
         transform: "translateX(-50%)",

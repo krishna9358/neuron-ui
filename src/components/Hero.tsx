@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Carousel from "./Carousel";
+import Navbar from "./Navbar";
 
 // ── Config ──────────────────────────────────────────────────────────
 const FRAME_COUNT = 240;
@@ -22,6 +23,8 @@ const ZOOM_END = 0.20;
 const BG_START = 0.08;
 const BG_END = 0.20;
 const FRAMES_START = 0.20;
+const FRAMES_END = 0.85;
+const ZOOMOUT_START = 0.85;
 
 // ── Helpers ─────────────────────────────────────────────────────────
 function lerp(a: number, b: number, t: number) {
@@ -222,14 +225,16 @@ const Hero = () => {
           drawFrame(0);
         }
         if (pWrap) pWrap.style.opacity = "0";
-      } else {
+      } else if (progress < FRAMES_END) {
         // ── FRAME ANIMATION PHASE: full-screen canvas, frames 1→240 ──
         canvas.style.opacity = "1";
         canvas.style.clipPath = "none";
         canvas.style.filter = "none";
+        canvas.style.transform = "none";
+        canvas.style.borderRadius = "0";
 
         const fp = clamp01(
-          (progress - FRAMES_START) / (1.0 - FRAMES_START)
+          (progress - FRAMES_START) / (FRAMES_END - FRAMES_START)
         );
         const idx = Math.round(fp * (FRAME_COUNT - 1));
 
@@ -241,6 +246,32 @@ const Hero = () => {
 
         if (pBar) pBar.style.width = `${fp * 100}%`;
         if (pWrap) pWrap.style.opacity = fp < 0.95 ? "1" : "0";
+      } else {
+        // ── ZOOM-OUT PHASE: canvas shrinks into a card shape ──
+        const zp = clamp01(
+          (progress - ZOOMOUT_START) / (1.0 - ZOOMOUT_START)
+        );
+        const zt = easeOutCubic(zp);
+
+        // Show last frame
+        if (frameRef.current !== FRAME_COUNT - 1) {
+          frameRef.current = FRAME_COUNT - 1;
+          cancelAnimationFrame(rafRef.current);
+          rafRef.current = requestAnimationFrame(() =>
+            drawFrame(FRAME_COUNT - 1)
+          );
+        }
+
+        // Shrink canvas with clip-path inset + border-radius
+        const insetX = lerp(0, 40, zt);
+        const insetY = lerp(0, 30, zt);
+        const rad = lerp(0, 24, zt);
+        canvas.style.clipPath = `inset(${insetY}px ${insetX}px ${insetY}px ${insetX}px round ${rad}px)`;
+        canvas.style.opacity = String(1 - zt * 0.4);
+        canvas.style.transform = `scale(${1 - zt * 0.08})`;
+        canvas.style.filter = "none";
+
+        if (pWrap) pWrap.style.opacity = "0";
       }
 
       // ─── Background: light → dark ───
@@ -289,6 +320,9 @@ const Hero = () => {
           backgroundColor: "#F8F4F1",
         }}
       >
+        {/* ──── Navbar (only in Hero section) ──── */}
+        <Navbar />
+
         {/* ──── Hero content (fades out on scroll) ──── */}
         <div
           ref={contentRef}

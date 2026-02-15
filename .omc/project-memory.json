@@ -116,6 +116,85 @@
       ]
     }
   },
-  "hotPaths": [],
+  "hotPaths": [
+    {
+      "path": "src/components/Hero.tsx",
+      "accessCount": 9,
+      "lastAccessed": 1771116494278,
+      "type": "file"
+    },
+    {
+      "path": "src/components/CalSchedule.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1771117802887,
+      "type": "file"
+    },
+    {
+      "path": "src/components/CoreCapabilities.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1771117697887,
+      "type": "file"
+    },
+    {
+      "path": "src/app/page.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1771117253600,
+      "type": "file"
+    },
+    {
+      "path": "src/components/ScrollStackSection.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1771116292904,
+      "type": "file"
+    },
+    {
+      "path": "src/components/ProjectCard.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1771116494712,
+      "type": "file"
+    },
+    {
+      "path": "src/components/Navbar.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1771115748089,
+      "type": "file"
+    },
+    {
+      "path": ".context/attachments/Screenshot 2026-02-15 at 5.56.33 AM.png",
+      "accessCount": 1,
+      "lastAccessed": 1771115322622,
+      "type": "file"
+    },
+    {
+      "path": "src/app/layout.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1771115725053,
+      "type": "file"
+    },
+    {
+      "path": ".context/attachments/Screenshot 2026-02-15 at 6.10.52 AM.png",
+      "accessCount": 1,
+      "lastAccessed": 1771116163106,
+      "type": "file"
+    },
+    {
+      "path": ".context/attachments/pasted_text_2026-02-15_06-18-24.txt",
+      "accessCount": 1,
+      "lastAccessed": 1771116554527,
+      "type": "file"
+    },
+    {
+      "path": "src/types/matter-js.d.ts",
+      "accessCount": 1,
+      "lastAccessed": 1771117159875,
+      "type": "file"
+    },
+    {
+      "path": ".context/attachments/Screenshot 2026-02-15 at 6.38.54 AM.png",
+      "accessCount": 1,
+      "lastAccessed": 1771117754165,
+      "type": "file"
+    }
+  ],
   "userDirectives": []
 }

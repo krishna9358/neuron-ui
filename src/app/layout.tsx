@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
-import { Inter, Kaushan_Script } from "next/font/google";
+import { Inter, Kaushan_Script, DM_Serif_Display } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 const kaushanScript = Kaushan_Script({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-title",
+});
+const dmSerifDisplay = DM_Serif_Display({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-serif",
 });
 
 export const metadata: Metadata = {
@@ -22,8 +26,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} ${kaushanScript.variable}`}>
-        <Navbar />
+      <body className={`${inter.className} ${kaushanScript.variable} ${dmSerifDisplay.variable}`}>
         {children}
       </body>
     </html>
