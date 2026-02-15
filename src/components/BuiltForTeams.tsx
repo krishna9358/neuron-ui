@@ -30,12 +30,10 @@ function cBez(a: number, c1: number, c2: number, b: number, t: number) {
 }
 
 // ── Config ───────────────────────────────────────────────────────────
-const SECTION_HEIGHT_VH = 500;
+const SECTION_HEIGHT_VH = 300;
 
-// Phase boundaries (fraction of total scroll range)
-const TEXT_END = 0.56; // text animation finishes at 56% of total scroll
-const CAL_START = 0.62; // cal transition begins at 62%
-const CAL_END = 0.90; // cal transition ends at 90%
+// Phase boundary (fraction of total scroll range)
+const TEXT_END = 0.85;
 
 // ── Cursor SVG ───────────────────────────────────────────────────────
 const CursorArrow: React.FC<{ color: string }> = ({ color }) => (
@@ -177,10 +175,6 @@ const BuiltForTeams: React.FC = () => {
     const edenRef = useRef<HTMLDivElement>(null);
     const brookeRef = useRef<HTMLDivElement>(null);
 
-    // Cal transition refs
-    const titleGroupRef = useRef<HTMLDivElement>(null);
-    const calRef = useRef<HTMLDivElement>(null);
-
     const [assembled, setAssembled] = useState(false);
     const assembledRef = useRef(false);
 
@@ -241,12 +235,6 @@ const BuiltForTeams: React.FC = () => {
                 [jordanRef, jesseRef, edenRef, brookeRef].forEach((r) => {
                     if (r.current) r.current.style.opacity = "0";
                 });
-                if (titleGroupRef.current)
-                    titleGroupRef.current.style.transform = "none";
-                if (calRef.current) {
-                    calRef.current.style.opacity = "0";
-                    calRef.current.style.transform = "translateY(60px)";
-                }
                 rafId = requestAnimationFrame(tick);
                 return;
             }
@@ -274,22 +262,12 @@ const BuiltForTeams: React.FC = () => {
                 [jordanRef, jesseRef, edenRef, brookeRef].forEach((r) => {
                     if (r.current) r.current.style.opacity = "0";
                 });
-                if (titleGroupRef.current) {
-                    titleGroupRef.current.style.transform = `translateY(${-(vh * 0.22)}px) scale(0.55)`;
-                }
-                if (calRef.current) {
-                    calRef.current.style.opacity = "1";
-                    calRef.current.style.transform = "translateY(0)";
-                }
                 rafId = requestAnimationFrame(tick);
                 return;
             }
 
             // ── PINNED ──
             const p = clamp01(totalP / TEXT_END);
-            const calP = easeOutCubic(
-                clamp01((totalP - CAL_START) / (CAL_END - CAL_START))
-            );
             const settleP = easeOutCubic(clamp01((p - 0.78) / 0.15));
 
             const cx = vw / 2;
@@ -297,14 +275,12 @@ const BuiltForTeams: React.FC = () => {
             const textHalf = isMobile
                 ? vw * 0.32
                 : Math.min(vw * 0.24, 300);
-
-            const cursorFade = 1 - calP;
             const CURSOR_APPEAR = 0.01;
 
             // ── Grid ──
             if (gridRef.current) {
                 const gridBase = clamp01((p - 0.05) / 0.15);
-                gridRef.current.style.opacity = String(gridBase * cursorFade);
+                gridRef.current.style.opacity = String(gridBase);
             }
 
             // ════════════════════════════════════════════════════════════
@@ -413,7 +389,7 @@ const BuiltForTeams: React.FC = () => {
                 }
 
                 jordanRef.current.style.opacity = String(
-                    (visible ? 1 : 0) * cursorFade
+                    visible ? 1 : 0
                 );
                 jordanRef.current.style.transform = `translate(${jx}px, ${jy}px)`;
             }
@@ -463,7 +439,7 @@ const BuiltForTeams: React.FC = () => {
                 }
 
                 jesseRef.current.style.opacity = String(
-                    (visible ? 1 : 0) * cursorFade
+                    visible ? 1 : 0
                 );
                 jesseRef.current.style.transform = `translate(${jx}px, ${jy}px)`;
             }
@@ -512,7 +488,7 @@ const BuiltForTeams: React.FC = () => {
                 }
 
                 brookeRef.current.style.opacity = String(
-                    (visible ? 1 : 0) * cursorFade
+                    visible ? 1 : 0
                 );
                 brookeRef.current.style.transform = `translate(${brX}px, ${brY}px)`;
             }
@@ -564,7 +540,7 @@ const BuiltForTeams: React.FC = () => {
                 }
 
                 edenRef.current.style.opacity = String(
-                    (visible ? 1 : 0) * cursorFade
+                    visible ? 1 : 0
                 );
                 edenRef.current.style.transform = `translate(${ex}px, ${ey}px)`;
             }
@@ -583,17 +559,6 @@ const BuiltForTeams: React.FC = () => {
             if (isAssembled !== assembledRef.current) {
                 assembledRef.current = isAssembled;
                 setAssembled(isAssembled);
-            }
-
-            // ── Cal transition: title shrinks up, cal fades in ──
-            if (titleGroupRef.current) {
-                const yShift = lerp(0, -(vh * 0.22), calP);
-                const scaleVal = lerp(1, 0.55, calP);
-                titleGroupRef.current.style.transform = `translateY(${yShift}px) scale(${scaleVal})`;
-            }
-            if (calRef.current) {
-                calRef.current.style.opacity = String(calP);
-                calRef.current.style.transform = `translateY(${lerp(60, 0, calP)}px)`;
             }
 
             rafId = requestAnimationFrame(tick);
@@ -639,13 +604,11 @@ const BuiltForTeams: React.FC = () => {
                 {/* Grid background */}
                 <GridBackground gridRef={gridRef} />
 
-                {/* ── Title group (moves up + scales during cal transition) ── */}
+                {/* ── Title group ── */}
                 <div
-                    ref={titleGroupRef}
                     style={{
                         position: "relative",
                         zIndex: 5,
-                        willChange: "transform",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
@@ -736,40 +699,6 @@ const BuiltForTeams: React.FC = () => {
                             Stay aligned, move faster, and build together
                         </p>
                     </div>
-                </div>
-
-                {/* ── Cal.com embed (fades in after text assembles) ── */}
-                <div
-                    ref={calRef}
-                    style={{
-                        position: "absolute",
-                        bottom: "2%",
-                        left: 0,
-                        right: 0,
-                        display: "flex",
-                        justifyContent: "center",
-                        padding: "0 16px",
-                        opacity: 0,
-                        zIndex: 5,
-                        willChange: "transform, opacity",
-                        overflow: "hidden",
-                    }}
-                >
-                    <iframe
-                        src="https://cal.com/neuronui/30min?embed&theme=dark&layout=month_view"
-                        style={{
-                            width: "100%",
-                            maxWidth: "1000px",
-                            height: "min(750px, 78vh)",
-                            minHeight: "500px",
-                            border: "none",
-                            borderRadius: "16px",
-                            colorScheme: "dark",
-                        }}
-                        loading="lazy"
-                        allow="payment"
-                        scrolling="no"
-                    />
                 </div>
 
                 {/* ── Cursors ── */}
