@@ -1,7 +1,7 @@
 import Hero from "@/components/Hero";
 import ScrollStackSection from "@/components/ScrollStackSection";
 import CoreCapabilities from "@/components/CoreCapabilities";
-import CalSchedule from "@/components/CalSchedule";
+import BuiltForTeams from "@/components/BuiltForTeams";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -17,7 +17,7 @@ export default function Home() {
         <CoreCapabilities />
       </div>
       <div id="contact">
-        <CalSchedule />
+        <BuiltForTeams />
       </div>
       <Footer />
     </main>
