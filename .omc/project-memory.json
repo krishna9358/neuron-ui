@@ -1,0 +1,200 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1771110285020,
+  "projectRoot": "/Users/krishnamohan/Desktop/neuron-ui",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "next",
+        "version": "16.1.6",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "19.2.3",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "19.2.3",
+        "category": "frontend"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": null,
+    "lintCommand": "npm run lint",
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start",
+      "lint": "eslint"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": "type-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "public",
+      "src"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 5,
+      "lastAccessed": 1771110284953,
+      "keyFiles": [
+        "file.svg",
+        "globe.svg",
+        "next.svg",
+        "vercel.svg",
+        "window.svg"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 0,
+      "lastAccessed": 1771110284954,
+      "keyFiles": []
+    },
+    "src/app": {
+      "path": "src/app",
+      "purpose": "Application code",
+      "fileCount": 5,
+      "lastAccessed": 1771110284997,
+      "keyFiles": [
+        "favicon.ico",
+        "globals.css",
+        "layout.tsx"
+      ]
+    },
+    "src/components": {
+      "path": "src/components",
+      "purpose": "UI components",
+      "fileCount": 3,
+      "lastAccessed": 1771110284997,
+      "keyFiles": [
+        "Carousel.tsx",
+        "Hero.tsx",
+        "Navbar.tsx"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src/components/Hero.tsx",
+      "accessCount": 9,
+      "lastAccessed": 1771116494278,
+      "type": "file"
+    },
+    {
+      "path": "src/components/CalSchedule.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1771117802887,
+      "type": "file"
+    },
+    {
+      "path": "src/components/CoreCapabilities.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1771117697887,
+      "type": "file"
+    },
+    {
+      "path": "src/app/page.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1771117253600,
+      "type": "file"
+    },
+    {
+      "path": "src/components/ScrollStackSection.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1771116292904,
+      "type": "file"
+    },
+    {
+      "path": "src/components/ProjectCard.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1771116494712,
+      "type": "file"
+    },
+    {
+      "path": "src/components/Navbar.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1771115748089,
+      "type": "file"
+    },
+    {
+      "path": ".context/attachments/Screenshot 2026-02-15 at 5.56.33 AM.png",
+      "accessCount": 1,
+      "lastAccessed": 1771115322622,
+      "type": "file"
+    },
+    {
+      "path": "src/app/layout.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1771115725053,
+      "type": "file"
+    },
+    {
+      "path": ".context/attachments/Screenshot 2026-02-15 at 6.10.52 AM.png",
+      "accessCount": 1,
+      "lastAccessed": 1771116163106,
+      "type": "file"
+    },
+    {
+      "path": ".context/attachments/pasted_text_2026-02-15_06-18-24.txt",
+      "accessCount": 1,
+      "lastAccessed": 1771116554527,
+      "type": "file"
+    },
+    {
+      "path": "src/types/matter-js.d.ts",
+      "accessCount": 1,
+      "lastAccessed": 1771117159875,
+      "type": "file"
+    },
+    {
+      "path": ".context/attachments/Screenshot 2026-02-15 at 6.38.54 AM.png",
+      "accessCount": 1,
+      "lastAccessed": 1771117754165,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
