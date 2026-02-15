@@ -206,16 +206,19 @@ function ScrollRow({
   direction: "left" | "right";
   isMobile: boolean;
 }) {
+  const [isPaused, setIsPaused] = useState(false);
   const doubled = [...reviews, ...reviews];
   const gap = isMobile ? 12 : 20;
 
   return (
     <div
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
       style={{
         overflow: "hidden",
         width: "100%",
-        maskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
-        WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
+        maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+        WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
       }}
     >
       <div
@@ -224,6 +227,7 @@ function ScrollRow({
           gap: `${gap}px`,
           width: "max-content",
           animation: `${direction === "left" ? "scrollLeft" : "scrollRight"} ${isMobile ? "25s" : "35s"} linear infinite`,
+          animationPlayState: isPaused ? "paused" : "running",
         }}
       >
         {doubled.map((review, i) => (

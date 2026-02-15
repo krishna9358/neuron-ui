@@ -312,7 +312,7 @@ function FullscreenMenuOverlay({
             style={{
               position: "absolute",
               inset: 0,
-              background: "rgba(10, 10, 10, 0.85)",
+              background: "rgba(10, 10, 10, 0.55)",
               backdropFilter: "blur(40px)",
               WebkitBackdropFilter: "blur(40px)",
             }}
