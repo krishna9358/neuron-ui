@@ -242,37 +242,6 @@ export default function Carousel() {
         );
       })}
 
-      {/* Dot indicators */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "-28px",
-          display: "flex",
-          gap: "8px",
-          zIndex: 60,
-        }}
-      >
-        {images.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrentIndex(i)}
-            aria-label={`Go to slide ${i + 1}`}
-            style={{
-              width: i === currentIndex ? "24px" : "8px",
-              height: "8px",
-              borderRadius: "4px",
-              border: "none",
-              backgroundColor:
-                i === currentIndex
-                  ? "rgba(0,0,0,0.6)"
-                  : "rgba(0,0,0,0.15)",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              padding: 0,
-            }}
-          />
-        ))}
-      </div>
     </div>
   );
 }

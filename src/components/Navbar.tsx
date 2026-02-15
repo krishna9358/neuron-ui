@@ -20,8 +20,8 @@ function useWindowWidth() {
 const menuItems = [
   { name: "Home", href: "#hero" },
   { name: "Projects", href: "#projects" },
-  { name: "About Me", href: "#about" },
-  { name: "Services & Capabilities", href: "#capabilities" },
+  { name: "Services", href: "#services" },
+  { name: "Testimonials", href: "#testimonials" },
   { name: "Contact", href: "#contact" },
 ];
 
@@ -158,9 +158,20 @@ function NavLink({ name, href }: { name: string; href: string }) {
   const characters = name.split("");
   const lineH = 20;
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const el = document.querySelector(href);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    } else if (href === "#hero") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
-    <Link
+    <a
       href={href}
+      onClick={handleClick}
       style={{
         position: "relative",
         color: isHovered ? "#fff" : "#ccc",
@@ -203,7 +214,7 @@ function NavLink({ name, href }: { name: string; href: string }) {
           </motion.span>
         </span>
       ))}
-    </Link>
+    </a>
   );
 }
 
@@ -427,6 +438,19 @@ export default function Navbar() {
     };
   }, []);
 
+  // Fallback: show hamburger when scrolled past 80vh (ensures visibility in project cards)
+  useEffect(() => {
+    const onScroll = () => {
+      const scrollY = window.scrollY;
+      const threshold = window.innerHeight * 0.8;
+      if (scrollY > threshold && !isHidden) {
+        setIsHidden(true);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isHidden]);
+
   return (
     <>
       {/* ─── Standard Navbar (visible during Hero only) ─── */}
@@ -482,15 +506,20 @@ export default function Navbar() {
             }}
           >
             <NavLink name="Projects" href="#projects" />
-            <NavLink name="About us" href="#about" />
-            <NavLink name="Pricing" href="#" />
+            <NavLink name="Services" href="#services" />
+            <NavLink name="Testimonials" href="#testimonials" />
           </div>
         )}
 
         {/* CTA (hidden on mobile) */}
         {!isMobile ? (
-          <Link
+          <a
             href="#contact"
+            onClick={(e) => {
+              e.preventDefault();
+              const el = document.querySelector("#contact");
+              if (el) el.scrollIntoView({ behavior: "smooth" });
+            }}
             style={{
               backgroundColor: "#1145A0",
               color: "#fff",
@@ -509,7 +538,7 @@ export default function Navbar() {
             }
           >
             Book a Demo
-          </Link>
+          </a>
         ) : <div />}
       </motion.nav>
 
@@ -523,9 +552,16 @@ export default function Navbar() {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             style={{
               position: "fixed",
-              top: isMobile ? "16px" : "24px",
-              right: isMobile ? "16px" : "32px",
-              zIndex: 300,
+              top: isMobile ? "12px" : "20px",
+              right: isMobile ? "12px" : "28px",
+              zIndex: 9999,
+              backgroundColor: "rgba(26, 26, 26, 0.7)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              borderRadius: "12px",
+              padding: "8px",
+              border: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
             }}
           >
             <HamburgerButton
