@@ -118,33 +118,57 @@
   },
   "hotPaths": [
     {
+      "path": "src/app/page.tsx",
+      "accessCount": 27,
+      "lastAccessed": 1771192074398,
+      "type": "file"
+    },
+    {
       "path": "src/components/BuiltForTeams.tsx",
-      "accessCount": 13,
-      "lastAccessed": 1771186148394,
+      "accessCount": 24,
+      "lastAccessed": 1771191706712,
+      "type": "file"
+    },
+    {
+      "path": "src/components/Navbar.tsx",
+      "accessCount": 19,
+      "lastAccessed": 1771190374814,
       "type": "file"
     },
     {
       "path": "src/components/Hero.tsx",
-      "accessCount": 10,
-      "lastAccessed": 1771183444173,
+      "accessCount": 18,
+      "lastAccessed": 1771190754826,
       "type": "file"
     },
     {
       "path": "src/components/CalSchedule.tsx",
-      "accessCount": 9,
-      "lastAccessed": 1771186000877,
-      "type": "file"
-    },
-    {
-      "path": "src/app/page.tsx",
-      "accessCount": 7,
-      "lastAccessed": 1771186004940,
+      "accessCount": 11,
+      "lastAccessed": 1771191551784,
       "type": "file"
     },
     {
       "path": "src/components/CoreCapabilities.tsx",
       "accessCount": 6,
       "lastAccessed": 1771183438205,
+      "type": "file"
+    },
+    {
+      "path": "src/app/globals.css",
+      "accessCount": 6,
+      "lastAccessed": 1771189067847,
+      "type": "file"
+    },
+    {
+      "path": "src/components/Carousel.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1771189066533,
+      "type": "file"
+    },
+    {
+      "path": "src/components/Testimonials.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1771190360137,
       "type": "file"
     },
     {
@@ -155,8 +179,8 @@
     },
     {
       "path": "src/components/ProjectCard.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1771116494712,
+      "accessCount": 4,
+      "lastAccessed": 1771188970832,
       "type": "file"
     },
     {
@@ -166,16 +190,10 @@
       "type": "directory"
     },
     {
-      "path": "src/components/Navbar.tsx",
+      "path": "",
       "accessCount": 2,
-      "lastAccessed": 1771115748089,
-      "type": "file"
-    },
-    {
-      "path": "src/app/globals.css",
-      "accessCount": 2,
-      "lastAccessed": 1771186005336,
-      "type": "file"
+      "lastAccessed": 1771190351622,
+      "type": "directory"
     },
     {
       "path": ".context/attachments/Screenshot 2026-02-15 at 5.56.33 AM.png",
@@ -262,15 +280,33 @@
       "type": "directory"
     },
     {
-      "path": "",
-      "accessCount": 1,
-      "lastAccessed": 1771185991758,
-      "type": "directory"
-    },
-    {
       "path": ".context/attachments/PR instructions.md",
       "accessCount": 1,
       "lastAccessed": 1771186229676,
+      "type": "file"
+    },
+    {
+      "path": ".context/attachments/image-v1.png",
+      "accessCount": 1,
+      "lastAccessed": 1771188302858,
+      "type": "file"
+    },
+    {
+      "path": ".context/attachments/image-v3.png",
+      "accessCount": 1,
+      "lastAccessed": 1771188303146,
+      "type": "file"
+    },
+    {
+      "path": ".context/attachments/image-v2.png",
+      "accessCount": 1,
+      "lastAccessed": 1771188303387,
+      "type": "file"
+    },
+    {
+      "path": ".context/attachments/image-v4.png",
+      "accessCount": 1,
+      "lastAccessed": 1771190266841,
       "type": "file"
     }
   ],
