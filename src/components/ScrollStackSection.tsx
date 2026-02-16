@@ -247,6 +247,22 @@ const ScrollStackSection: React.FC = () => {
         backgroundColor: "#0a0a0a",
       }}
     >
+      {/* Invisible snap-point markers at each card boundary */}
+      {projects.map((_, i) => (
+        <div
+          key={`snap-${i}`}
+          style={{
+            position: "absolute",
+            top: `${i * VH_PER_CARD}vh`,
+            left: 0,
+            width: "1px",
+            height: "1px",
+            scrollSnapAlign: "start",
+            pointerEvents: "none",
+          }}
+        />
+      ))}
+
       <div
         style={{
           position: "sticky",
