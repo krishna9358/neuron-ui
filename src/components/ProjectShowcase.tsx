@@ -12,6 +12,14 @@ const projects: ProjectData[] = [
         hash: "EC4TM4BC50NS6A000",
         tags: ["NATTNS", "SHOPIFY", "STOREFRONT", "API", "GRID"],
         creditLabel: "Content Earth",
+        stackImages: [
+            "/site1/ina2.png",
+            "/site1/ina4.png",
+            "/site1/ins.png",
+            "/site1/ins1.png",
+            "/site1/ins3.png",
+            "/site1/ins5.png",
+        ],
     },
     {
         title: "Aetheria",
@@ -20,6 +28,11 @@ const projects: ProjectData[] = [
         hash: "7F2BA9DC41E8F3B02",
         tags: ["THREE.JS", "GSAP", "WEBGL", "PORTFOLIO", "CMS"],
         creditLabel: "Digital Nomad",
+        stackImages: [
+            "/site2/sol1.png",
+            "/site2/sol2.png",
+            "/site2/sol3.png",
+        ],
     },
     {
         title: "Nocturn",
@@ -28,6 +41,10 @@ const projects: ProjectData[] = [
         hash: "A91CD5E823FA07D44",
         tags: ["REACT", "D3.JS", "WEBSOCKET", "DASHBOARD", "API"],
         creditLabel: "Metric Labs",
+        stackImages: [
+            "/site3/housie1.png",
+            "/site3/housie2.png",
+        ],
     },
     {
         title: "Verdant",
