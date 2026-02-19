@@ -24,6 +24,14 @@ const projects: ProjectData[] = [
     tags: ["NEXTJS", "SHOPIFY STOREFRONT API", "GSAP"],
     creditLabel: "Content Earth",
     category: "ECOMMERCE WEBSITE",
+    stackImages: [
+      "/site1/ina2.png",
+      "/site1/ina4.png",
+      "/site1/ins.png",
+      "/site1/ins1.png",
+      "/site1/ins3.png",
+      "/site1/ins5.png",
+    ],
   },
   {
     title: "Aetheria",
@@ -33,6 +41,11 @@ const projects: ProjectData[] = [
     tags: ["THREE.JS", "GSAP", "WEBGL"],
     creditLabel: "Digital Nomad",
     category: "PORTFOLIO EXPERIENCE",
+    stackImages: [
+      "/site2/sol1.png",
+      "/site2/sol2.png",
+      "/site2/sol3.png",
+    ],
   },
   {
     title: "Nocturn",
@@ -42,6 +55,10 @@ const projects: ProjectData[] = [
     tags: ["REACT", "D3.JS", "WEBSOCKET"],
     creditLabel: "Metric Labs",
     category: "ANALYTICS DASHBOARD",
+    stackImages: [
+      "/site3/housie1.png",
+      "/site3/housie2.png",
+    ],
   },
   {
     title: "Verdant",
@@ -90,6 +107,8 @@ const cardBackgroundImages = [
   "/images/carousel-1.png",
 ];
 
+const SCROLL_PAUSE_DURATION = 600; // ms to pause scroll when a card snaps into view
+
 const ScrollStackSection: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -108,8 +127,41 @@ const ScrollStackSection: React.FC = () => {
   // Track active card for content fade animation
   const [activeCard, setActiveCard] = useState(0);
 
+  // ── Scroll-pause refs ──────────────────────────────────────────────────
+  const lastActiveIdx = useRef(0);
+  const isScrollLocked = useRef(false);
+  const lockScrollY = useRef(0);
+  const lockTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const setCardRef = useCallback((el: HTMLDivElement | null, i: number) => {
     cardRefs.current[i] = el;
+  }, []);
+
+  // ── Scroll-lock: prevent wheel & touch scroll while paused ───────────
+  useEffect(() => {
+    const preventScroll = (e: Event) => {
+      if (isScrollLocked.current) {
+        e.preventDefault();
+      }
+    };
+
+    // Also hold the scroll position in place during lock
+    const holdPosition = () => {
+      if (isScrollLocked.current) {
+        window.scrollTo({ top: lockScrollY.current });
+      }
+    };
+
+    window.addEventListener("wheel", preventScroll, { passive: false });
+    window.addEventListener("touchmove", preventScroll, { passive: false });
+    window.addEventListener("scroll", holdPosition, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", preventScroll);
+      window.removeEventListener("touchmove", preventScroll);
+      window.removeEventListener("scroll", holdPosition);
+      if (lockTimeoutId.current) clearTimeout(lockTimeoutId.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -152,6 +204,25 @@ const ScrollStackSection: React.FC = () => {
           activeIdx = i;
           break;
         }
+      }
+
+      // ── Scroll-pause: lock scroll briefly when active card changes ──
+      if (activeIdx !== lastActiveIdx.current && !isScrollLocked.current) {
+        // Only trigger pause when inside the section (section is visible)
+        if (rect.top <= 0 && rect.bottom >= vh) {
+          isScrollLocked.current = true;
+          lockScrollY.current = window.scrollY;
+
+          // Clear any existing timeout
+          if (lockTimeoutId.current) clearTimeout(lockTimeoutId.current);
+
+          // Unlock after the pause duration
+          lockTimeoutId.current = setTimeout(() => {
+            isScrollLocked.current = false;
+            lockTimeoutId.current = null;
+          }, SCROLL_PAUSE_DURATION);
+        }
+        lastActiveIdx.current = activeIdx;
       }
 
       // Update React state for active card (for content fade)

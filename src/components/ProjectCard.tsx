@@ -23,6 +23,7 @@ export interface ProjectData {
   siteUrl?: string;
   creditLabel?: string;
   previewImages?: string[];
+  stackImages?: string[];
   category?: string;
 }
 
@@ -173,16 +174,38 @@ const WavyText: React.FC<{
 
 
 // ── Stacked Website Mockup Cards ──────────────────────────────────────────
-const StackedMockupCards: React.FC<{ title: string }> = ({ title }) => {
+const StackedMockupCards: React.FC<{ title: string; images?: string[] }> = ({
+  title,
+  images,
+}) => {
   const [currentIdx, setCurrentIdx] = useState(0);
 
-  const pages = [
-    { label: "Homepage", subtitle: "Where timeless style meets modern grace." },
-    { label: "Collection", subtitle: "Discover our latest seasonal arrivals." },
-    { label: "About", subtitle: "Crafted with passion and purpose." },
+  // If we have images, create pages from them. Otherwise fall back to a default set.
+  const defaultPages = [
+    {
+      label: "Homepage",
+      subtitle: "Where timeless style meets modern grace.",
+      image: "",
+    },
+    {
+      label: "Collection",
+      subtitle: "Discover our latest seasonal arrivals.",
+      image: "",
+    },
+    { label: "About", subtitle: "Crafted with passion and purpose.", image: "" },
   ];
 
+  const pages =
+    images && images.length > 0
+      ? images.map((img, i) => ({
+        label: `View ${i + 1}`,
+        subtitle: "Explore the project details and design.",
+        image: img,
+      }))
+      : defaultPages;
+
   useEffect(() => {
+    // Determine interval speed based on whether we have images or not, usually same is fine
     const interval = setInterval(() => {
       setCurrentIdx((prev) => (prev + 1) % pages.length);
     }, 3500);
@@ -201,6 +224,7 @@ const StackedMockupCards: React.FC<{ title: string }> = ({ title }) => {
       }}
     >
       {pages.map((page, i) => {
+        // Calculate offset for cyclic stacking
         const offset = (i - currentIdx + pages.length) % pages.length;
 
         let yOff = 0;
@@ -222,6 +246,7 @@ const StackedMockupCards: React.FC<{ title: string }> = ({ title }) => {
           zIdx = 2;
           rotateZ = -1;
         } else {
+          // Send all others to the back stack position
           yOff = -30;
           scaleVal = 0.88;
           opacityVal = 0.4;
@@ -304,7 +329,7 @@ const StackedMockupCards: React.FC<{ title: string }> = ({ title }) => {
                 </div>
               </div>
 
-              {/* Large title */}
+              {/* Large title area */}
               <div
                 style={{
                   flex: 1,
@@ -344,28 +369,48 @@ const StackedMockupCards: React.FC<{ title: string }> = ({ title }) => {
               {/* Bottom image area */}
               <div
                 style={{
-                  height: "40%",
+                  height: page.image ? "100%" : "40%",
+                  width: "100%",
                   background:
                     "linear-gradient(180deg, #e8e2dc 0%, #d5cec6 100%)",
-                  position: "relative",
+                  position: page.image ? "absolute" : "relative",
+                  top: 0,
+                  left: 0,
+                  zIndex: page.image ? 10 : 0,
                   overflow: "hidden",
                 }}
               >
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background:
-                      "linear-gradient(135deg, rgba(180,170,158,0.4) 0%, rgba(160,150,138,0.2) 50%, rgba(180,170,158,0.4) 100%)",
-                  }}
-                />
+                {/* If we have an image, show it. Otherwise show default gradient overlay. */}
+                {page.image ? (
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      backgroundImage: `url(${page.image})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "top center",
+                    }}
+                  />
+                ) : (
+                  <>
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        background:
+                          "linear-gradient(135deg, rgba(180,170,158,0.4) 0%, rgba(160,150,138,0.2) 50%, rgba(180,170,158,0.4) 100%)",
+                      }}
+                    />
+                  </>
+                )}
                 <div
                   style={{
                     position: "absolute",
                     bottom: "10px",
                     left: "18px",
                     fontSize: "7px",
-                    color: "#888",
+                    color: page.image ? "#fff" : "#888",
+                    textShadow: page.image ? "0 1px 2px rgba(0,0,0,0.5)" : "none",
                     letterSpacing: "1px",
                     textTransform: "uppercase",
                   }}
@@ -625,7 +670,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               maxHeight: "380px",
             }}
           >
-            <StackedMockupCards title={title} />
+            <StackedMockupCards
+              title={title}
+              images={project.stackImages}
+            />
           </div>
         )}
       </div>
