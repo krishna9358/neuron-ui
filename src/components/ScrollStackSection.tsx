@@ -41,11 +41,7 @@ const projects: ProjectData[] = [
     tags: ["THREE.JS", "GSAP", "WEBGL"],
     creditLabel: "Digital Nomad",
     category: "PORTFOLIO EXPERIENCE",
-    stackImages: [
-      "/site2/sol1.png",
-      "/site2/sol2.png",
-      "/site2/sol3.png",
-    ],
+    stackImages: ["/site2/sol1.png", "/site2/sol2.png", "/site2/sol3.png"],
   },
   {
     title: "Nocturn",
@@ -55,10 +51,7 @@ const projects: ProjectData[] = [
     tags: ["REACT", "D3.JS", "WEBSOCKET"],
     creditLabel: "Metric Labs",
     category: "ANALYTICS DASHBOARD",
-    stackImages: [
-      "/site3/housie1.png",
-      "/site3/housie2.png",
-    ],
+    stackImages: ["/site3/housie1.png", "/site3/housie2.png"],
   },
   {
     title: "Verdant",
@@ -101,10 +94,10 @@ const cardGradients = [
 
 // ── Per-card background images (blurred behind gradient) ──
 const cardBackgroundImages = [
-  "/images/carousel-1.png",
-  "/images/carousel-2.png",
-  "/images/carousel-3.png",
-  "/images/carousel-1.png",
+  "/site1/ina2.png",
+  "/site2/sol1.png",
+  "/site3/housie1.png",
+  "/site1/ina2.png",
 ];
 
 const SCROLL_PAUSE_DURATION = 600; // ms to pause scroll when a card snaps into view
@@ -256,7 +249,7 @@ const ScrollStackSection: React.FC = () => {
           card.style.zIndex = String(i + 1);
         } else {
           let enterProgress = clamp01(
-            (progress - cardStart) / (cardPhaseLen * 0.5)
+            (progress - cardStart) / (cardPhaseLen * 0.5),
           );
 
           // Force first card to be fully visible immediately
@@ -271,7 +264,7 @@ const ScrollStackSection: React.FC = () => {
                 ((i + 1) * VH_PER_CARD) /
                 (TOTAL_CARDS * VH_PER_CARD + EXTRA_VH);
               const nextEnterProgress = clamp01(
-                (progress - nextStart) / (cardPhaseLen * 0.5)
+                (progress - nextStart) / (cardPhaseLen * 0.5),
               );
               const behindCount = activeIdx - i;
               const targetScale = Math.max(0.85, 1 - behindCount * 0.05);
@@ -280,7 +273,7 @@ const ScrollStackSection: React.FC = () => {
               card.style.transform = `scale(${currentScale})`;
               card.style.transformOrigin = "center top";
               card.style.opacity = String(
-                Math.max(0.6, 1 - behindCount * 0.12)
+                Math.max(0.6, 1 - behindCount * 0.12),
               );
             } else {
               // Active card: full size

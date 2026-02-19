@@ -26,7 +26,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} ${kaushanScript.variable} ${dmSerifDisplay.variable}`}>
+      <body suppressHydrationWarning className={`${inter.className} ${kaushanScript.variable} ${dmSerifDisplay.variable}`}>
         {children}
       </body>
     </html>

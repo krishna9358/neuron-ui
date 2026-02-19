@@ -60,118 +60,119 @@ const WavyText: React.FC<{
   letterSpacing = "2px",
   border = false,
 }) => {
-    const [isHovered, setIsHovered] = useState(false);
-    const characters = text.split("");
-    const h = parseInt(fontSize) + 4;
+  const [isHovered, setIsHovered] = useState(false);
+  const characters = text.split("");
+  const h = parseInt(fontSize) + 4;
 
-    const inner = (
+  const inner = (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: border ? "10px" : undefined,
+        padding: border ? "12px 24px" : undefined,
+        border: border ? "1px solid rgba(255,255,255,0.15)" : undefined,
+        borderRadius: border ? "30px" : undefined,
+        cursor: "pointer",
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <span
         style={{
           display: "inline-flex",
-          alignItems: "center",
-          gap: border ? "10px" : undefined,
-          padding: border ? "12px 24px" : undefined,
-          border: border ? "1px solid rgba(255,255,255,0.15)" : undefined,
-          borderRadius: border ? "30px" : undefined,
-          cursor: "pointer",
+          height: `${h}px`,
+          overflow: "hidden",
         }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
-        <span
-          style={{
-            display: "inline-flex",
-            height: `${h}px`,
-            overflow: "hidden",
-          }}
-        >
-          {characters.map((char, i) => (
-            <span
-              key={i}
-              style={{
-                display: "inline-block",
-                overflow: "hidden",
-                height: `${h}px`,
-                width: char === " " ? Math.max(parseInt(fontSize) * 0.35, 4) + "px" : undefined,
+        {characters.map((char, i) => (
+          <span
+            key={i}
+            style={{
+              display: "inline-block",
+              overflow: "hidden",
+              height: `${h}px`,
+              width:
+                char === " "
+                  ? Math.max(parseInt(fontSize) * 0.35, 4) + "px"
+                  : undefined,
+            }}
+          >
+            <motion.span
+              animate={{ y: isHovered ? -h : 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 25,
+                delay: i * 0.025,
               }}
+              style={{ display: "block", lineHeight: `${h}px` }}
             >
-              <motion.span
-                animate={{ y: isHovered ? -h : 0 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 400,
-                  damping: 25,
-                  delay: i * 0.025,
+              <span
+                style={{
+                  display: "block",
+                  height: `${h}px`,
+                  fontSize,
+                  fontWeight,
+                  letterSpacing,
+                  textTransform: "uppercase",
+                  color: hoverColor && isHovered ? hoverColor : color,
+                  fontFamily,
+                  transition: "color 0.2s",
                 }}
-                style={{ display: "block", lineHeight: `${h}px` }}
               >
-                <span
-                  style={{
-                    display: "block",
-                    height: `${h}px`,
-                    fontSize,
-                    fontWeight,
-                    letterSpacing,
-                    textTransform: "uppercase",
-                    color: hoverColor && isHovered ? hoverColor : color,
-                    fontFamily,
-                    transition: "color 0.2s",
-                  }}
-                >
-                  {char === " " ? "\u00A0" : char}
-                </span>
-                <span
-                  style={{
-                    display: "block",
-                    height: `${h}px`,
-                    fontSize,
-                    fontWeight,
-                    letterSpacing,
-                    textTransform: "uppercase",
-                    color: hoverColor || color,
-                    fontFamily,
-                  }}
-                >
-                  {char === " " ? "\u00A0" : char}
-                </span>
-              </motion.span>
-            </span>
-          ))}
-        </span>
+                {char === " " ? "\u00A0" : char}
+              </span>
+              <span
+                style={{
+                  display: "block",
+                  height: `${h}px`,
+                  fontSize,
+                  fontWeight,
+                  letterSpacing,
+                  textTransform: "uppercase",
+                  color: hoverColor || color,
+                  fontFamily,
+                }}
+              >
+                {char === " " ? "\u00A0" : char}
+              </span>
+            </motion.span>
+          </span>
+        ))}
       </span>
-    );
+    </span>
+  );
 
-    if (href) {
-      return (
-        <a
-          href={href}
-          target={href.startsWith("http") ? "_blank" : undefined}
-          rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-          style={{ textDecoration: "none", color: "inherit" }}
-          onClick={onClick}
-        >
-          {inner}
-        </a>
-      );
-    }
-
+  if (href) {
     return (
-      <button
+      <a
+        href={href}
+        target={href.startsWith("http") ? "_blank" : undefined}
+        rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+        style={{ textDecoration: "none", color: "inherit" }}
         onClick={onClick}
-        style={{
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-          color: "inherit",
-        }}
       >
         {inner}
-      </button>
+      </a>
     );
-  };
+  }
 
-
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: "none",
+        border: "none",
+        padding: 0,
+        cursor: "pointer",
+        color: "inherit",
+      }}
+    >
+      {inner}
+    </button>
+  );
+};
 
 // ── Stacked Website Mockup Cards ──────────────────────────────────────────
 const StackedMockupCards: React.FC<{ title: string; images?: string[] }> = ({
@@ -192,23 +193,27 @@ const StackedMockupCards: React.FC<{ title: string; images?: string[] }> = ({
       subtitle: "Discover our latest seasonal arrivals.",
       image: "",
     },
-    { label: "About", subtitle: "Crafted with passion and purpose.", image: "" },
+    {
+      label: "About",
+      subtitle: "Crafted with passion and purpose.",
+      image: "",
+    },
   ];
 
   const pages =
     images && images.length > 0
       ? images.map((img, i) => ({
-        label: `View ${i + 1}`,
-        subtitle: "Explore the project details and design.",
-        image: img,
-      }))
+          label: `View ${i + 1}`,
+          subtitle: "Explore the project details and design.",
+          image: img,
+        }))
       : defaultPages;
 
   useEffect(() => {
-    // Determine interval speed based on whether we have images or not, usually same is fine
+    // Determine interval speed based on whether we have images or not
     const interval = setInterval(() => {
       setCurrentIdx((prev) => (prev + 1) % pages.length);
-    }, 3500);
+    }, 4000);
     return () => clearInterval(interval);
   }, [pages.length]);
 
@@ -218,69 +223,87 @@ const StackedMockupCards: React.FC<{ title: string; images?: string[] }> = ({
         position: "relative",
         width: "100%",
         height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        perspective: "1000px", // Adds depth for 3D transforms
       }}
     >
       {pages.map((page, i) => {
         // Calculate offset for cyclic stacking
-        const offset = (i - currentIdx + pages.length) % pages.length;
+        // 0 = Active, 1 = Next, ... , last = Moving to back
+        // We want a stack where 0 is front, 1 is behind, 2 is behind that...
 
+        const relativeIndex = (i - currentIdx + pages.length) % pages.length;
+
+        // We only show top 3 cards visually to avoid clutter, hiding others
+        const isVisible = relativeIndex < 3;
+
+        // Visual properties based on stack position
         let yOff = 0;
         let scaleVal = 1;
         let opacityVal = 1;
         let zIdx = 3;
-        let rotateZ = 0;
+        let blurVal = 0;
+        let brightnessVal = 1;
 
-        if (offset === 0) {
+        if (relativeIndex === 0) {
+          // Front card
           yOff = 0;
           scaleVal = 1;
           opacityVal = 1;
-          zIdx = 3;
-          rotateZ = 0;
-        } else if (offset === 1) {
-          yOff = -16;
-          scaleVal = 0.94;
-          opacityVal = 0.7;
-          zIdx = 2;
-          rotateZ = -1;
-        } else {
-          // Send all others to the back stack position
-          yOff = -30;
-          scaleVal = 0.88;
-          opacityVal = 0.4;
+          zIdx = 10;
+          blurVal = 0;
+          brightnessVal = 1;
+        } else if (relativeIndex === 1) {
+          // Second card
+          yOff = -12; // Slightly above
+          scaleVal = 0.95;
+          opacityVal = 0.8;
+          zIdx = 5;
+          blurVal = 1; // Slight blur for depth
+          brightnessVal = 0.7; // Darker
+        } else if (relativeIndex === 2) {
+          // Third card
+          yOff = -24;
+          scaleVal = 0.9;
+          opacityVal = 0.5;
           zIdx = 1;
-          rotateZ = -2;
+          blurVal = 2;
+          brightnessVal = 0.5;
+        } else {
+          // Others (hidden/transitioning)
+          yOff = -36;
+          scaleVal = 0.85;
+          opacityVal = 0;
+          zIdx = 0;
         }
 
         return (
           <motion.div
-            key={i}
+            key={i} // Use rigid key to maintain varying stack order
             animate={{
               y: yOff,
               scale: scaleVal,
               opacity: opacityVal,
-              rotate: rotateZ,
+              zIndex: zIdx,
+              filter: `blur(${blurVal}px) brightness(${brightnessVal})`,
             }}
             transition={{
-              duration: 0.7,
-              ease: [0.22, 1, 0.36, 1],
+              duration: 0.8,
+              ease: [0.16, 1, 0.3, 1], // Smooth elegant ease
             }}
             style={{
               position: "absolute",
-              top: "12px",
-              left: "12px",
-              right: "12px",
-              bottom: "12px",
-              borderRadius: "14px",
-              background: "#f5f0eb",
-              zIndex: zIdx,
+              top: "10%",
+              left: "5%",
+              right: "5%",
+              bottom: "5%",
+              borderRadius: "16px",
+              background: "#1a1a1a", // Dark card base
               overflow: "hidden",
               boxShadow:
-                offset === 0
-                  ? "0 12px 48px rgba(0,0,0,0.3)"
-                  : "0 6px 24px rgba(0,0,0,0.15)",
+                relativeIndex === 0
+                  ? "0 20px 50px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.1) inset"
+                  : "none",
+              pointerEvents: relativeIndex === 0 ? "auto" : "none",
             }}
           >
             <div
@@ -289,135 +312,121 @@ const StackedMockupCards: React.FC<{ title: string; images?: string[] }> = ({
                 height: "100%",
                 display: "flex",
                 flexDirection: "column",
-                color: "#1a1a1a",
+                position: "relative",
               }}
             >
-              {/* Mini nav */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "12px 18px",
-                  borderBottom: "1px solid rgba(0,0,0,0.08)",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "9px",
-                    fontWeight: 600,
-                    letterSpacing: "1.2px",
-                    color: "#444",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Shop
-                </span>
-                <div style={{ display: "flex", gap: "14px" }}>
-                  {["Search", "Profile", "Cart (0)"].map((item) => (
-                    <span
-                      key={item}
-                      style={{
-                        fontSize: "7.5px",
-                        color: "#888",
-                        letterSpacing: "0.8px",
-                      }}
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Large title area */}
-              <div
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  padding: "0 24px",
-                }}
-              >
-                <h3
-                  style={{
-                    fontFamily:
-                      "var(--font-serif), 'DM Serif Display', serif",
-                    fontSize: "clamp(28px, 3vw, 48px)",
-                    fontWeight: 400,
-                    lineHeight: 1.0,
-                    color: "#1a1a1a",
-                    marginBottom: "8px",
-                    letterSpacing: "-0.5px",
-                  }}
-                >
-                  {title}
-                </h3>
-                <p
-                  style={{
-                    fontSize: "9px",
-                    color: "#999",
-                    letterSpacing: "0.3px",
-                    lineHeight: 1.5,
-                    maxWidth: "250px",
-                  }}
-                >
-                  {page.subtitle}
-                </p>
-              </div>
-
-              {/* Bottom image area */}
-              <div
-                style={{
-                  height: page.image ? "100%" : "40%",
-                  width: "100%",
-                  background:
-                    "linear-gradient(180deg, #e8e2dc 0%, #d5cec6 100%)",
-                  position: page.image ? "absolute" : "relative",
-                  top: 0,
-                  left: 0,
-                  zIndex: page.image ? 10 : 0,
-                  overflow: "hidden",
-                }}
-              >
-                {/* If we have an image, show it. Otherwise show default gradient overlay. */}
-                {page.image ? (
-                  <div
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      backgroundImage: `url(${page.image})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "top center",
-                    }}
-                  />
-                ) : (
-                  <>
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        background:
-                          "linear-gradient(135deg, rgba(180,170,158,0.4) 0%, rgba(160,150,138,0.2) 50%, rgba(180,170,158,0.4) 100%)",
-                      }}
-                    />
-                  </>
-                )}
+              {page.image ? (
+                /* Full Image Mode */
                 <div
                   style={{
                     position: "absolute",
-                    bottom: "10px",
-                    left: "18px",
-                    fontSize: "7px",
-                    color: page.image ? "#fff" : "#888",
-                    textShadow: page.image ? "0 1px 2px rgba(0,0,0,0.5)" : "none",
-                    letterSpacing: "1px",
-                    textTransform: "uppercase",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "#0d0d0d",
                   }}
                 >
-                  {page.label}
+                  {/* Image fitted with contain to show full content without compromising it */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={page.image}
+                    alt={page.label}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      display: "block",
+                    }}
+                  />
+
+                  {/* Label Overlay */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "12px",
+                      left: "12px",
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      background: "rgba(0,0,0,0.6)",
+                      backdropFilter: "blur(4px)",
+                      fontSize: "9px",
+                      color: "#fff",
+                      textTransform: "uppercase",
+                      letterSpacing: "1px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {page.label}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* Fallback (No Image) UI */
+                <>
+                  <div
+                    style={{
+                      padding: "16px 20px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      {[0, 1, 2].map((d) => (
+                        <div
+                          key={d}
+                          style={{
+                            width: "6px",
+                            height: "6px",
+                            borderRadius: "50%",
+                            background:
+                              d === 0
+                                ? "#ff5f56"
+                                : d === 1
+                                  ? "#ffbd2e"
+                                  : "#27c93f",
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "8px",
+                        color: "#555",
+                        letterSpacing: "1px",
+                      }}
+                    >
+                      NEURON UI
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      padding: "0 24px",
+                      background: "#121212",
+                    }}
+                  >
+                    <h3
+                      style={{
+                        fontFamily: "var(--font-serif), serif",
+                        fontSize: "24px",
+                        color: "#fff",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      {title}
+                    </h3>
+                    <p style={{ fontSize: "10px", color: "#666" }}>
+                      {page.subtitle}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           </motion.div>
         );
@@ -425,8 +434,6 @@ const StackedMockupCards: React.FC<{ title: string; images?: string[] }> = ({
     </div>
   );
 };
-
-
 
 // ── Main ProjectCard Component ────────────────────────────────────────────
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -670,15 +677,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               maxHeight: "380px",
             }}
           >
-            <StackedMockupCards
-              title={title}
-              images={project.stackImages}
-            />
+            <StackedMockupCards title={title} images={project.stackImages} />
           </div>
         )}
       </div>
-
-
     </div>
   );
 };
