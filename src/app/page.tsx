@@ -11,25 +11,45 @@ export default function Home() {
   return (
     <main>
       <Navbar />
-      <div id="hero" style={{ scrollSnapAlign: "start" }}>
+      <div id="hero">
         <Hero />
       </div>
-      <div id="projects" style={{ scrollSnapAlign: "start" }}>
+      <div id="projects">
         <ScrollStackSection />
       </div>
-      <div id="services" style={{ scrollSnapAlign: "start" }}>
+      {/* 
+        Every section AFTER the scroll stack needs position: relative + z-index: 2
+        so it paints ABOVE the scroll-stack-container (which has z-index: 1).
+        Without this, the last pinned card could visually overlap these sections
+        because transform creates new stacking contexts.
+      */}
+      <div
+        id="services"
+        style={{ position: "relative", zIndex: 2, background: "#0a0a0a" }}
+      >
         <CoreCapabilities />
       </div>
-      <div id="testimonials" style={{ scrollSnapAlign: "start" }}>
+      <div
+        id="testimonials"
+        style={{ position: "relative", zIndex: 2, background: "#0a0a0a" }}
+      >
         <Testimonials />
       </div>
-      <div id="teams" style={{ scrollSnapAlign: "start" }}>
+      <div
+        id="teams"
+        style={{ position: "relative", zIndex: 2, background: "#0a0a0a" }}
+      >
         <BuiltForTeams />
       </div>
-      <div id="contact" style={{ scrollSnapAlign: "start" }}>
+      <div
+        id="contact"
+        style={{ position: "relative", zIndex: 2, background: "#0a0a0a" }}
+      >
         <CalSchedule />
       </div>
-      <Footer />
+      <div style={{ position: "relative", zIndex: 2, background: "#0a0a0a" }}>
+        <Footer />
+      </div>
     </main>
   );
 }

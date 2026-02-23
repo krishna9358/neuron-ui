@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, memo } from "react";
 import ProjectCard, { type ProjectData } from "./ProjectCard";
 
 // ── Project Data ──────────────────────────────────────────────────────────
@@ -50,43 +50,43 @@ const projects: ProjectData[] = [
 ];
 
 // ── Per-card visual styles ────────────────────────────────────────────────
-// Card 0 uses the last frame from Hero animation for seamless continuation.
-// Each subsequent card gets a unique deep gradient.
 const cardStyles: { gradient: string; backgroundImage?: string }[] = [
   {
     gradient: "linear-gradient(160deg, #0c1a2e 0%, #0f1f35 40%, #162d4a 100%)",
-    backgroundImage: "/site1/ina2.png",
+    backgroundImage: "/site1/blurredIns.png",
   },
   {
     gradient: "linear-gradient(160deg, #1e0a2e 0%, #2a1040 40%, #3d1860 100%)",
-    backgroundImage: "/site2/sol1.png",
+    backgroundImage: "/site2/blurredSol.png",
   },
   {
     gradient: "linear-gradient(160deg, #0a2e2a 0%, #0e3d38 40%, #145a52 100%)",
-    backgroundImage: "/site3/housie1.png",
+    backgroundImage: "/site3/blurredHousie1.png",
   },
   {
     gradient: "linear-gradient(160deg, #2e1a0a 0%, #402810 40%, #604018 100%)",
+    backgroundImage: "/site1/blurredIns.png",
   },
 ];
 
 // ── Scroll Config ─────────────────────────────────────────────────────────
 const CARD_MARGIN = 16;
-const VH_PER_CARD = 120; // Scroll distance per card (generous for smooth transitions)
-const EXTRA_VH = 60; // Extra scroll at the end so last card can settle
+const VH_PER_CARD = 120;
+const EXTRA_VH = 60;
 const TOTAL_CARDS = projects.length;
 const TOTAL_HEIGHT_VH = TOTAL_CARDS * VH_PER_CARD + EXTRA_VH;
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 function clamp01(v: number) {
-  return Math.max(0, Math.min(1, v));
+  return v < 0 ? 0 : v > 1 ? 1 : v; // Branchless-style for perf
 }
+
 function easeOutCubic(t: number) {
   return 1 - (1 - t) ** 3;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
-const ProjectShowcase: React.FC = () => {
+const ProjectShowcase: React.FC = memo(() => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const progressRefs = useRef<(SVGCircleElement | null)[]>([]);
@@ -105,6 +105,10 @@ const ProjectShowcase: React.FC = () => {
   );
 
   useEffect(() => {
+    // Performance: Pre-compute constants outside the scroll handler
+    const totalScrollDistance = TOTAL_CARDS * VH_PER_CARD + EXTRA_VH;
+    const circumference = 2 * Math.PI * 32;
+
     const update = () => {
       const section = sectionRef.current;
       if (!section) return;
@@ -116,14 +120,15 @@ const ProjectShowcase: React.FC = () => {
       const range = section.offsetHeight - vh;
       const progress = clamp01(scrolled / range);
 
-      // Skip if progress hasn't changed significantly
-      if (Math.abs(progress - lastProgress.current) < 0.0005) return;
+      // Performance: Skip if progress hasn't changed enough
+      // Tightened threshold from 0.0005 → 0.0002 for smoother visual
+      if (Math.abs(progress - lastProgress.current) < 0.0002) return;
       lastProgress.current = progress;
 
       // ── Compute active card ───────────────────────────────────────
       let activeIdx = 0;
       for (let i = TOTAL_CARDS - 1; i >= 0; i--) {
-        const cs = (i * VH_PER_CARD) / (TOTAL_CARDS * VH_PER_CARD + EXTRA_VH);
+        const cs = (i * VH_PER_CARD) / totalScrollDistance;
         if (progress >= cs) {
           activeIdx = i;
           break;
@@ -131,54 +136,47 @@ const ProjectShowcase: React.FC = () => {
       }
 
       // ── Update circular progress indicators ───────────────────────
-      const circumference = 2 * Math.PI * 32;
+      const fillFraction = (activeIdx + 1) / TOTAL_CARDS;
+      const offset = circumference * (1 - fillFraction);
       for (let i = 0; i < TOTAL_CARDS; i++) {
         const circle = progressRefs.current[i];
         if (!circle) continue;
-        const fillFraction = (activeIdx + 1) / TOTAL_CARDS;
-        const offset = circumference * (1 - fillFraction);
         circle.style.strokeDashoffset = String(offset);
       }
 
-      // ── Update card transforms ────────────────────────────────────
+      // ── Update card transforms (GPU-only: translate3d + opacity) ──
       for (let i = 0; i < TOTAL_CARDS; i++) {
         const card = cardRefs.current[i];
         if (!card) continue;
 
-        const cardStart =
-          (i * VH_PER_CARD) / (TOTAL_CARDS * VH_PER_CARD + EXTRA_VH);
-        const cardPhaseLen =
-          VH_PER_CARD / (TOTAL_CARDS * VH_PER_CARD + EXTRA_VH);
+        const cardStart = (i * VH_PER_CARD) / totalScrollDistance;
+        const cardPhaseLen = VH_PER_CARD / totalScrollDistance;
 
-        // First card is always fully visible (acts as continuation of last frame)
+        // First card: always visible
         if (i === 0) {
           card.style.opacity = "1";
-          card.style.transform = "translateY(0%) scale(1)";
+          card.style.transform = "translate3d(0, 0, 0) scale(1)";
           card.style.zIndex = String(i + 1);
           continue;
         }
 
         if (progress < cardStart) {
-          // Card hasn't entered yet — hidden below
           card.style.opacity = "0";
-          card.style.transform = "translateY(100%)";
+          card.style.transform = "translate3d(0, 100%, 0)";
           card.style.zIndex = String(i + 1);
         } else {
-          // Card is entering or has entered
           const enterProgress = clamp01(
             (progress - cardStart) / (cardPhaseLen * 0.5),
           );
           const easedEnter = easeOutCubic(enterProgress);
 
           if (enterProgress >= 1) {
-            // Fully entered — lock in place
-            card.style.transform = "translateY(0%) scale(1)";
+            card.style.transform = "translate3d(0, 0%, 0) scale(1)";
             card.style.opacity = "1";
           } else {
-            // Entering: slide up from bottom, FULLY OPAQUE so card behind is hidden
             const yOffset = (1 - easedEnter) * 100;
             card.style.opacity = "1";
-            card.style.transform = `translateY(${yOffset}%)`;
+            card.style.transform = `translate3d(0, ${yOffset}%, 0)`;
           }
           card.style.zIndex = String(i + 1);
         }
@@ -199,7 +197,6 @@ const ProjectShowcase: React.FC = () => {
     };
   }, []);
 
-  // ── Render ──────────────────────────────────────────────────────────────
   return (
     <section
       ref={sectionRef}
@@ -216,6 +213,8 @@ const ProjectShowcase: React.FC = () => {
           width: "100%",
           height: "100vh",
           overflow: "hidden",
+          // Performance: CSS containment for the sticky viewport
+          contain: "layout style paint",
         }}
       >
         <div
@@ -239,9 +238,14 @@ const ProjectShowcase: React.FC = () => {
                 width: i === 0 ? "100%" : undefined,
                 height: i === 0 ? "100%" : undefined,
                 opacity: i === 0 ? 1 : 0,
-                transform: i === 0 ? "none" : "translateY(100%)",
+                // Performance: Using translate3d instead of translateY
+                // to force GPU compositing from the start
+                transform:
+                  i === 0 ? "translate3d(0,0,0)" : "translate3d(0, 100%, 0)",
                 willChange: "transform, opacity",
                 zIndex: i + 1,
+                // Performance: Containment per card
+                contain: "layout style paint",
               }}
             >
               <ProjectCard
@@ -258,6 +262,8 @@ const ProjectShowcase: React.FC = () => {
       </div>
     </section>
   );
-};
+});
+
+ProjectShowcase.displayName = "ProjectShowcase";
 
 export default ProjectShowcase;
